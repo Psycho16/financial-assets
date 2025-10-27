@@ -1,0 +1,21 @@
+#root {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1 {
+  text-align: left;
+  margin: 0 0 12px;
+  transition: color 0.3s ease;
+}
+
+h2 {
+  transition: color 0.3s ease;
+}
+
+header {
+  margin-bottom: 24px;
+}

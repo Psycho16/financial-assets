@@ -1,0 +1,80 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr 1fr 1fr .6fr .8fr .9fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.footerRow {
+  display: grid;
+  grid-template-columns: 1.2fr .8fr 1fr 1fr .6fr .8fr .9fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.cellStrong {
+  font-weight: 600;
+}
+
+.cellMono {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.edit {
+  background: transparent;
+  border: 1px solid rgba(100, 108, 255, .5);
+  color: #aeb1ff;
+}
+
+.remove {
+  background: transparent;
+  border: 1px solid rgba(255, 0, 0, .35);
+  color: #ff8a8a;
+}
+
+.save {
+  background: #1e90ff;
+  border: 1px solid #1e90ff;
+  color: white;
+}
+
+.cancel {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .2);
+}
+
+.input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(0, 0, 0, .15);
+  color: inherit;
+}
+
+.empty {
+  opacity: .7;
+}
+
+@media (max-width: 920px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
