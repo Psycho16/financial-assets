@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx"
 
-const TOKEN = "t.uUmx8ZhdjheQf-nXBXzKsrkMP6Vbb9MoVOeQ_z7soQMVgBHfzHsQ-FNEko6L5xJEV5rp5Qr4vxzXS97YN11AHQ"
+const TOKEN = ""
 
 export class TInvestmentsStore {
   constructor() {

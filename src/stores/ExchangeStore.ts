@@ -7,6 +7,7 @@ export type ExchangeAsset = {
   category: string
   sector: string
   quantity: number
+  boardName?: string
 }
 
 const STORAGE_KEY = 'exchange-assets-store:v1'
@@ -56,6 +57,7 @@ export class ExchangeStore {
           category: String(x.category ?? 'Прочее'),
           sector: String(x.sector ?? 'Прочее'),
           quantity: Number(x.quantity ?? 0),
+          boardName: x.boardName ? String(x.boardName) : undefined,
         }))
       }
     } catch {

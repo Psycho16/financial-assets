@@ -30,18 +30,6 @@ export class MoexStore {
     this.loading.add(secid)
     this.errors.delete(secid)
 
-    // Try both TQBR (shares) and TQIF (funds) boards
-    // const boards = [
-    //   // shares
-    //   { name: 'TQBR', url: `https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities/${encodeURIComponent(secid)}.json?iss.meta=off&iss.only=marketdata&lang=ru` },
-    //   // funds
-    //   { name: 'TQIF', url: `https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQIF/securities/${encodeURIComponent(secid)}.json?iss.meta=off&iss.only=marketdata&lang=ru` },
-    //   // vim fund
-    //   { name: 'TQTF', url: `https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQTF/securities/${encodeURIComponent(secid)}.json?iss.meta=off&iss.only=marketdata&lang=ru` },
-    //   // metal currencies
-    //   { name: "CETS", url: `https://iss.moex.com/iss/engines/currency/markets/selt/boards/CETS/securities/${encodeURIComponent(secid)}.json?iss.meta=off&iss.only=marketdata&lang=ru` }
-    // ]
-
     const boards = ACCEPTED_BOARDS.map(boardName => ({
       name: boardName,
       url: getMoexBoardLink(secid, boardName),

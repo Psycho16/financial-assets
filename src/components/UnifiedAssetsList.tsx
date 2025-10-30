@@ -86,38 +86,38 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     fetchPrices()
   }, [exchangeStore.items.length])
 
-  const startEdit = (asset: UnifiedAsset) => {
-    if (asset.type === 'deposit') {
-      const deposit = asset.data
-      setEditing(prev => ({
-        ...prev,
-        [asset.id]: {
-          type: 'deposit',
-          data: {
-            name: deposit.name,
-            endDate: deposit.endDate,
-            amount: deposit.amount,
-            ratePercent: deposit.ratePercent,
-          }
-        }
-      }))
-    } else {
-      const exchange = asset.data
-      setEditing(prev => ({
-        ...prev,
-        [asset.id]: {
-          type: 'exchange',
-          data: {
-            name: exchange.name,
-            ticker: exchange.ticker ?? '',
-            category: exchange.category,
-            sector: exchange.sector,
-            quantity: exchange.quantity,
-          }
-        }
-      }))
-    }
-  }
+  // const startEdit = (asset: UnifiedAsset) => {
+  //   if (asset.type === 'deposit') {
+  //     const deposit = asset.data
+  //     setEditing(prev => ({
+  //       ...prev,
+  //       [asset.id]: {
+  //         type: 'deposit',
+  //         data: {
+  //           name: deposit.name,
+  //           endDate: deposit.endDate,
+  //           amount: deposit.amount,
+  //           ratePercent: deposit.ratePercent,
+  //         }
+  //       }
+  //     }))
+  //   } else {
+  //     const exchange = asset.data
+  //     setEditing(prev => ({
+  //       ...prev,
+  //       [asset.id]: {
+  //         type: 'exchange',
+  //         data: {
+  //           name: exchange.name,
+  //           ticker: exchange.ticker ?? '',
+  //           category: exchange.category,
+  //           sector: exchange.sector,
+  //           quantity: exchange.quantity,
+  //         }
+  //       }
+  //     }))
+  //   }
+  // }
 
   const cancelEdit = (id: string) => {
     setEditing(prev => {
@@ -480,8 +480,8 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                 // view mode
                 return (
                   <TableRow key={`${asset.type}-${asset.id}`}
-                    style={asset.type === 'deposit' ? undefined : { cursor: "pointer" }}
-                    onClick={asset.type === 'deposit' ? undefined : () => setactiveTicker(asset?.data.ticker || null)}
+                  // style={asset.type === 'deposit' ? undefined : { cursor: "pointer" }}
+                  // onClick={asset.type === 'deposit' ? undefined : () => setactiveTicker(asset?.data.ticker || null)}
                   >
                     <TableCell>
                       <div className={`${styles.typeBadge} ${asset.type === 'deposit' ? styles.typeDeposit : styles.typeExchange}`}>
@@ -517,9 +517,9 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                               }}>
                               <RemoveIcon />
                             </IconButton>
-                            <IconButton aria-label="edit" onClick={() => startEdit(asset)}>
+                            {/* <IconButton aria-label="edit" onClick={() => startEdit(asset)}>
                               <EditIcon />
-                            </IconButton>
+                            </IconButton> */}
                             <IconButton
                               aria-label="delete"
                               onClick={() => unifiedAssetsStore.removeAsset(asset.id, asset.type)}>
@@ -572,12 +572,12 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                               }}>
                               <RemoveIcon />
                             </IconButton>
-                            <IconButton aria-label="edit" onClick={(e) => {
+                            {/* <IconButton aria-label="edit" onClick={(e) => {
                               e.stopPropagation()
                               startEdit(asset)
                             }}>
                               <EditIcon />
-                            </IconButton>
+                            </IconButton> */}
                             <IconButton
                               aria-label="delete"
                               onClick={(e) => {

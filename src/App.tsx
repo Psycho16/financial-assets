@@ -31,10 +31,8 @@ function AppContent() {
           </Box>
         </Box>
       </header>
-      {/* <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}> */}
 
       <AssetsPie />
-      {/* </div> */}
       <AddAssetsDialog open={isAddingModalOpen} onClose={onCloseModal} />
       <h2 style={{ marginTop: 20 }}>Портфель активов</h2>
       <div style={{ marginTop: 12 }}>
