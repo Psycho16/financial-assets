@@ -82,7 +82,7 @@ export function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }
           onInputChange={(_, newInputValue) => {
             debouncedFetchOptions(newInputValue)
           }}
-          onChange={(e, value) => {
+          onChange={(_, value) => {
             const splittedValue = value?.name?.split(splitSymbol) ?? []
             const name = splittedValue[0]
             const ticker = splittedValue[1]
