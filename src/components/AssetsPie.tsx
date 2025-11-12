@@ -55,12 +55,15 @@ export const AssetsPie = observer(function AssetsPie() {
                 outerRadius={120}
                 onClick={handlePieClick}
                 style={{ cursor: 'pointer' }}
+                label={({ name, percent = 0 }: { name?: string, percent?: number }) => `${name} ${(percent * 100).toFixed(1)}%`}
               >
                 {data.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(v: any) => Number(v).toLocaleString('ru-RU')} />
+              <Tooltip
+                formatter={(value: any) => [`${Number(value).toLocaleString('ru-RU')} ₽`, 'Стоимость']}
+              />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

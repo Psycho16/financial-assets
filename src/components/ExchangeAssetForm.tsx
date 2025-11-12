@@ -46,22 +46,6 @@ export function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }
 
   const debouncedFetchOptions = debounce(fetchOptions, 500)
 
-  const addAsset = async (assetData: {
-    name: string;
-    ticker: string | undefined;
-    category: string;
-    sector: string;
-    quantity: number;
-    boardName: string | undefined;
-  }) => {
-    const userId = localStorage.getItem("user-id")
-    await axiosClient.post(PATHS.USERS.ADD_ASSET, {
-      userId,
-      ...assetData
-    })
-    console.info(assetData)
-  }
-
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const qty = Number(quantity)
@@ -69,16 +53,15 @@ export function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }
 
     const newAsset = {
       name: name.trim(),
-      ticker: ticker.trim() || undefined,
+      ticker: ticker.trim(),
       category: category.trim() || 'Прочее',
       sector: sector.trim() || 'Прочее',
       quantity: qty,
-      boardName: boardName.trim() || undefined,
+      boardName: boardName.trim(),
     }
 
-    await addAsset(newAsset)
+    await exchangeStore.add(newAsset)
 
-    exchangeStore.add(newAsset)
     setName('')
     setTicker('')
     setCategory('')

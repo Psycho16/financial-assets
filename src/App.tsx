@@ -9,6 +9,7 @@ import { Button, Box, Snackbar, TextField, Typography } from '@mui/material'
 import { AddAssetsDialog } from './components/AddAssetsDialog'
 import { axiosClient, PATHS } from './utils/axios'
 import { BrowserRouter, useLocation } from 'react-router-dom';
+import { USER_ID_KEY } from './constants/localStorage'
 
 
 const LoginScreen = ({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) => void }) => {
@@ -19,7 +20,7 @@ const LoginScreen = ({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) =
   const register = async () => {
     const resp = await axiosClient.post(PATHS.USERS.SIGN_UP, { email, password })
     const userId = resp.data?.user?.id
-    localStorage.setItem("user-id", userId)
+    localStorage.setItem(USER_ID_KEY, userId)
     setIsLoggedIn(true)
   }
 
@@ -27,7 +28,7 @@ const LoginScreen = ({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) =
     // kondtantin.lobanov2000@gmail.com
     const resp = await axiosClient.post(PATHS.USERS.SIGN_IN, { email, password })
     const userId = resp.data?.session?.user?.id
-    localStorage.setItem("user-id", userId)
+    localStorage.setItem(USER_ID_KEY, userId)
     setIsLoggedIn(true)
   }
 
@@ -80,7 +81,7 @@ const LoginScreen = ({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) =
 function AppContent() {
   const [isAddingModalOpen, setIsAddingModalOpen] = useState(false)
   const [showVerifyFinishAlert, setShowVerifyFinishAlert] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("user-id"))
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem(USER_ID_KEY))
   const location = useLocation()
 
   const onCloseModal = () => {
@@ -88,7 +89,7 @@ function AppContent() {
   }
 
   const leave = async () => {
-    localStorage.setItem("user-id", "")
+    localStorage.setItem(USER_ID_KEY, "")
     setIsLoggedIn(false)
   }
 

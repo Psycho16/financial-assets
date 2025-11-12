@@ -1,13 +1,19 @@
-import { makeAutoObservable, toJS } from 'mobx'
+import { makeAutoObservable, runInAction, toJS } from 'mobx'
+import { USER_ID_KEY } from '../constants/localStorage'
+import { axiosClient, PATHS } from '../utils/axios'
 
 export type ExchangeAsset = {
   id: string
   name: string
-  ticker?: string
+  amount: number
   category: string
-  sector: string
+  price: number
+  totalPrice: number
+  changePercent: number
+  boardName: string
   quantity: number
-  boardName?: string
+  sector: string
+  ticker: string
 }
 
 const STORAGE_KEY = 'exchange-assets-store:v1'
@@ -17,20 +23,28 @@ export class ExchangeStore {
 
   constructor() {
     makeAutoObservable(this)
-    this.load()
+    this.loadAssets()
   }
 
-  add(item: Omit<ExchangeAsset, 'id'>) {
-    const record: ExchangeAsset = { id: crypto.randomUUID(), ...item }
-    this.items.push(record)
-    this.save()
+  async add(item: Pick<ExchangeAsset, "name" | "ticker" | "category" | "sector" | "quantity" | "boardName">) {
+    const userId = localStorage.getItem(USER_ID_KEY)
+
+    await axiosClient.post(PATHS.USERS.ADD_ASSET, {
+      userId,
+      ...item
+    })
+
+    await this.loadAssets()
+
   }
 
-  update(id: string, changes: Partial<Omit<ExchangeAsset, 'id'>>) {
-    const idx = this.items.findIndex(x => x.id === id)
-    if (idx === -1) return
-    this.items[idx] = { ...this.items[idx], ...changes }
-    this.save()
+  async update(id: string, changes: Partial<Omit<ExchangeAsset, 'id'>>) {
+    await axiosClient.patch(PATHS.USER_ASSETS.EDIT_QUANTITY, {
+      assetId: id,
+      quantity: changes.quantity,
+    })
+
+    await this.loadAssets()
   }
 
   remove(id: string) {
@@ -44,24 +58,23 @@ export class ExchangeStore {
     } catch { }
   }
 
-  private load() {
+  private async loadAssets() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
-      const arr = JSON.parse(raw)
-      if (Array.isArray(arr)) {
-        this.items = arr.map((x: any) => ({
-          id: String(x.id ?? crypto.randomUUID()),
-          name: String(x.name ?? ''),
-          ticker: x.ticker ? String(x.ticker) : undefined,
-          category: String(x.category ?? 'Прочее'),
-          sector: String(x.sector ?? 'Прочее'),
-          quantity: Number(x.quantity ?? 0),
-          boardName: x.boardName ? String(x.boardName) : undefined,
-        }))
-      }
+      const userId = localStorage.getItem(USER_ID_KEY)
+      const resp = await axiosClient.get<{ userAssets: ExchangeAsset[] }>(PATHS.USER_ASSETS.GET_ASSETS, { params: { userId } })
+      const userAssets = resp?.data?.userAssets
+
+      if (!userAssets) return
+      // Basic validation
+      runInAction(() => {
+        this.items = Array.isArray(userAssets)
+          ? userAssets
+          : []
+      })
     } catch {
-      this.items = []
+      runInAction(() => {
+        this.items = []
+      })
     }
   }
 }

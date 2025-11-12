@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { exchangeStore, type ExchangeAsset } from '../stores/ExchangeStore'
 import { moexStore } from '../stores/MoexStore'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 import { Dialog, DialogTitle, DialogContent, IconButton, Tabs, Tab } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { useState } from 'react'
@@ -102,7 +102,7 @@ export const ExchangeAssetsModal = observer(function ExchangeAssetsModal({ open,
                   <Tooltip
                     formatter={(value: any) => [`${Number(value).toLocaleString('ru-RU')} ₽`, 'Стоимость']}
                   />
-                  {/* <Legend /> */}
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </>
