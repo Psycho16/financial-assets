@@ -20,6 +20,7 @@ const STORAGE_KEY = 'exchange-assets-store:v1'
 
 export class ExchangeStore {
   items: ExchangeAsset[] = []
+  isLoading = false
 
   constructor() {
     makeAutoObservable(this)
@@ -47,9 +48,14 @@ export class ExchangeStore {
     await this.loadAssets()
   }
 
-  remove(id: string) {
-    this.items = this.items.filter(x => x.id !== id)
-    this.save()
+  async remove(id: string) {
+    await axiosClient.delete(PATHS.USER_ASSETS.DELETE, {
+      params: {
+        assetId: id,
+      }
+    })
+
+    await this.loadAssets()
   }
 
   private save() {
@@ -59,6 +65,9 @@ export class ExchangeStore {
   }
 
   private async loadAssets() {
+    runInAction(() => {
+      this.isLoading = true
+    })
     try {
       const userId = localStorage.getItem(USER_ID_KEY)
       const resp = await axiosClient.get<{ userAssets: ExchangeAsset[] }>(PATHS.USER_ASSETS.GET_ASSETS, { params: { userId } })
@@ -74,6 +83,10 @@ export class ExchangeStore {
     } catch {
       runInAction(() => {
         this.items = []
+      })
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
       })
     }
   }

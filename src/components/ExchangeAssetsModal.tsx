@@ -20,8 +20,7 @@ export const ExchangeAssetsModal = observer(function ExchangeAssetsModal({ open,
 
   const getDataByKey = (pieChartKey: keyof ExchangeAsset) => {
     return exchangeStore.items.reduce((acc, item) => {
-      const price = moexStore.getPrice(item.ticker)
-      const value = price !== undefined ? price * item.quantity : 0
+      const value = item.totalPrice
 
       if (value > 0) {
         const dataKey = item[pieChartKey] || 'Прочее'

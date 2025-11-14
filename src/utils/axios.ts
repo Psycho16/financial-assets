@@ -13,6 +13,7 @@ export const PATHS = {
   USER_ASSETS: {
     GET_ASSETS: "user-assets/",
     EDIT_QUANTITY: "user-assets/edit-asset-quantity",
+    DELETE: "user-assets/delete-asset",
   },
   USERS: {
     SIGN_UP: "users/sign-up",

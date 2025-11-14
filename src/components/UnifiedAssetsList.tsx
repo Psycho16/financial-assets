@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
 import { unifiedAssetsStore, type DepositT, type ExchangeT, type UnifiedAsset, type UnifiedDepositAsset, type UnifiedExchangeAsset } from '../stores/UnifiedAssetsStore'
 import { type Deposit } from '../stores/DepositStore'
@@ -75,16 +75,6 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     direction: 'desc'
   })
 
-  const fetchPrices = async () => {
-    const tickers = Array.from(new Set(exchangeStore.items.map(x => x.ticker).filter(Boolean)))
-    for (const t of tickers) {
-      moexStore.fetchSharePrice(t)
-    }
-  }
-
-  useEffect(() => {
-    fetchPrices()
-  }, [exchangeStore.items.length])
 
   // const startEdit = (asset: UnifiedAsset) => {
   //   if (asset.type === 'deposit') {
@@ -226,8 +216,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
       return deposit.amount
     } else {
       const exchange = asset.data
-      const price = moexStore.getPrice(exchange.ticker)
-      return price !== undefined ? price * exchange.quantity : 0
+      return exchange.totalPrice !== undefined ? exchange.totalPrice : 0
     }
   }
 
@@ -294,14 +283,12 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
           if (a.type === 'deposit') {
             aValue = 0
           } else {
-            const price = moexStore.getPrice(a.data.ticker)
-            aValue = price !== undefined ? price : 0
+            aValue = a.data.price
           }
           if (b.type === 'deposit') {
             bValue = 0
           } else {
-            const price = moexStore.getPrice(b.data.ticker)
-            bValue = price !== undefined ? price : 0
+            bValue = b.data.price
           }
           break
         case 'value':
@@ -332,7 +319,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
 
   return (
     <>
-      {moexStore.loading.size !== 0 ?
+      {exchangeStore.isLoading ?
         <CircularProgress />
         :
         <TableContainer component={Paper} sx={{ maxHeight: 380 }}>
@@ -542,9 +529,9 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                         <TableCell
                           style={{ maxWidth: "100px" }}
                           className={styles.cellMono}
-                          title={`${moexStore.getPrice(asset.data.ticker) !== undefined ? `${formatNumber(moexStore.getPrice(asset.data.ticker)!)} р` : '-'}`}
+                          title={`${asset.data.price !== undefined ? `${formatNumber(asset.data.price)} р` : '-'}`}
                         >
-                          {moexStore.getPrice(asset.data.ticker) !== undefined ? `${formatNumber(moexStore.getPrice(asset.data.ticker)!)} р` : '-'}
+                          {`${asset.data.price !== undefined ? `${formatNumber(asset.data.price)} р` : '-'}`}
                         </TableCell>
                         <TableCell
                           className={styles.cellMono}

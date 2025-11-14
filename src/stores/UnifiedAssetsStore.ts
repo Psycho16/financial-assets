@@ -1,7 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 import { depositStore, type Deposit } from './DepositStore'
 import { exchangeStore, type ExchangeAsset } from './ExchangeStore'
-import { moexStore } from './MoexStore'
 
 export type ExchangeT = "exchange"
 export type DepositT = "deposit"
@@ -51,9 +50,8 @@ export class UnifiedAssetsStore {
 
   get summary(): AssetSummary {
     const depositValue = depositStore.items.reduce((sum, deposit) => sum + deposit.amount, 0)
-    const exchangeValue = exchangeStore.items.reduce((sum, exchange) => {
-      const price = moexStore.getPrice(exchange.ticker)
-      return sum + (price !== undefined ? price * exchange.quantity : 0)
+    const exchangeValue = exchangeStore.items.reduce((sum, item) => {
+      return sum + item.totalPrice
     }, 0)
 
     return {
