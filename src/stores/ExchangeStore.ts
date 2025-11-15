@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction, toJS } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
 import { USER_ID_KEY } from '../constants/localStorage'
 import { axiosClient, PATHS } from '../utils/axios'
 
@@ -15,8 +15,6 @@ export type ExchangeAsset = {
   sector: string
   ticker: string
 }
-
-const STORAGE_KEY = 'exchange-assets-store:v1'
 
 export class ExchangeStore {
   items: ExchangeAsset[] = []
@@ -56,12 +54,6 @@ export class ExchangeStore {
     })
 
     await this.loadAssets()
-  }
-
-  private save() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(toJS(this.items)))
-    } catch { }
   }
 
   private async loadAssets() {

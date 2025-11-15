@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite'
 import { unifiedAssetsStore, type DepositT, type ExchangeT, type UnifiedAsset, type UnifiedDepositAsset, type UnifiedExchangeAsset } from '../stores/UnifiedAssetsStore'
 import { type Deposit } from '../stores/DepositStore'
 import { exchangeStore, type ExchangeAsset } from '../stores/ExchangeStore'
-import { moexStore } from '../stores/MoexStore'
 import styles from './UnifiedAssetsList.module.scss'
 import TextField from '@mui/material/TextField'
 import {
@@ -307,7 +306,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
       }
       return 0
     })
-  }, [unifiedAssetsStore.allAssets, sortState, moexStore])
+  }, [unifiedAssetsStore.allAssets, sortState])
 
   const totalValue = unifiedAssetsStore.allAssets.reduce((sum, asset) => {
     return sum + getAssetValue(asset)
