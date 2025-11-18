@@ -25,7 +25,6 @@ import RemoveIcon from '@mui/icons-material/Remove'
 // import EditIcon from '@mui/icons-material/Edit'
 import { formatNumber } from '../utils/numberFormat'
 import { QuantityDialog } from './QuantityDialog'
-import { DividendsModal } from './DividendsModal'
 
 type EditingState = {
   [id: string]: {
@@ -48,7 +47,6 @@ type SortState = {
 export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
   const theme = useTheme()
   const [editing, setEditing] = useState<EditingState>({})
-  const [activeTicker, setactiveTicker] = useState<string | null>(null)
 
   const [quantityDialog, setQuantityDialog] = useState<{
     open: boolean
@@ -626,12 +624,6 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
           operation={quantityDepositDialog.operation}
         />
       )}
-
-      <DividendsModal
-        onClose={() => setactiveTicker(null)}
-        open={!!activeTicker}
-        ticker={activeTicker}
-      />
     </>
   )
 })

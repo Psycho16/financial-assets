@@ -38,7 +38,6 @@ export class UnifiedAssetsStore {
       type: 'deposit',
       data: deposit
     }))
-    console.log('deposits', deposits)
 
     const exchanges: UnifiedAsset[] = exchangeStore.items.map(exchange => ({
       id: exchange.id,

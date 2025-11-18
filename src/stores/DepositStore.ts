@@ -29,9 +29,13 @@ export class DepositStore {
     await this.loadDeposits()
   }
 
-  update(id: string, changes: Partial<Omit<Deposit, 'id'>>) {
-    console.log(id, changes)
-    // TODO: make update method
+  async update(id: string, changes: Partial<Omit<Deposit, 'id'>>) {
+    await axiosClient.patch(PATHS.USER_DEPOSITS.EDIT_AMOUNT, {
+      depositId: id,
+      amount: changes.amount,
+    })
+
+    await this.loadDeposits()
   }
 
   async remove(id: string) {

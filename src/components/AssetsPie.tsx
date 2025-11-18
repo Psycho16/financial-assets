@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
-import { assetStore } from '../stores/AssetStore'
 import { depositStore } from '../stores/DepositStore'
 import { exchangeStore } from '../stores/ExchangeStore'
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from 'recharts'
@@ -13,23 +12,22 @@ import { useTheme } from '../contexts/ThemeContext'
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7f50', '#00c49f', '#0088fe', '#ffbb28']
 
-
+type PieData = { name: string, value: number }
 export const AssetsPie = observer(function AssetsPie() {
   const [isExchangeModalOpen, setIsExchangeModalOpen] = useState(false)
   const { mode } = useTheme()
 
-  const base = Object.entries(assetStore.totalsByCategory).map(([name, value]) => ({ name, value }))
-  const depositsTotal = depositStore.items.reduce((s, d) => s + d.amount, 0)
-  const exchangeTotal = exchangeStore.items.reduce((s, it) => {
-    const v = it.totalPrice !== undefined ? it.totalPrice : 0
-    return s + v
+  const depositsTotal = depositStore.items.reduce((acc, { amount }) => acc + amount, 0)
+  const exchangeTotal = exchangeStore.items.reduce((acc, { totalPrice }) => {
+    const v = totalPrice !== undefined ? totalPrice : 0
+    return acc + v
   }, 0)
-  const extra = [] as { name: string, value: number }[]
-  if (depositsTotal > 0) extra.push({ name: 'Вклады', value: depositsTotal })
-  if (exchangeTotal > 0) extra.push({ name: 'Биржевые активы', value: exchangeTotal })
-  const data = [...base, ...extra]
+  const data: PieData[] = []
+  if (depositsTotal > 0) data.push({ name: 'Вклады', value: depositsTotal })
+  if (exchangeTotal > 0) data.push({ name: 'Биржевые активы', value: exchangeTotal })
 
-  const handlePieClick = (data: any) => {
+
+  const handlePieClick = (data: PieData) => {
     if (data && data.name === 'Биржевые активы') {
       setIsExchangeModalOpen(true)
     }
