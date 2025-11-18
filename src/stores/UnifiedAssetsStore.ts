@@ -38,6 +38,7 @@ export class UnifiedAssetsStore {
       type: 'deposit',
       data: deposit
     }))
+    console.log('deposits', deposits)
 
     const exchanges: UnifiedAsset[] = exchangeStore.items.map(exchange => ({
       id: exchange.id,
@@ -53,6 +54,8 @@ export class UnifiedAssetsStore {
     const exchangeValue = exchangeStore.items.reduce((sum, item) => {
       return sum + item.totalPrice
     }, 0)
+
+    console.log('depositValue', depositValue, depositStore.items)
 
     return {
       totalValue: depositValue + exchangeValue,

@@ -1,4 +1,6 @@
-import { makeAutoObservable, toJS } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
+import { USER_ID_KEY } from '../constants/localStorage'
+import { axiosClient, PATHS } from '../utils/axios'
 
 export type Deposit = {
   id: string
@@ -7,57 +9,64 @@ export type Deposit = {
   amount: number
   ratePercent: number
 }
-
-const STORAGE_KEY = 'deposits-store:v1'
-
 export class DepositStore {
   items: Deposit[] = []
+  isLoading = false
 
   constructor() {
     makeAutoObservable(this)
-    this.load()
+    this.loadDeposits()
   }
 
-  add(item: Omit<Deposit, 'id'>) {
-    const rec: Deposit = { id: crypto.randomUUID(), ...item }
-    this.items.push(rec)
-    this.save()
+  async add(item: Omit<Deposit, 'id'>) {
+    const userId = localStorage.getItem(USER_ID_KEY)
+
+    await axiosClient.post(PATHS.USER_DEPOSITS.ADD, {
+      userId,
+      ...item
+    })
+
+    await this.loadDeposits()
   }
 
   update(id: string, changes: Partial<Omit<Deposit, 'id'>>) {
-    const i = this.items.findIndex(x => x.id === id)
-    if (i === -1) return
-    this.items[i] = { ...this.items[i], ...changes }
-    this.save()
+    console.log(id, changes)
+    // TODO: make update method
   }
 
-  remove(id: string) {
-    this.items = this.items.filter(x => x.id !== id)
-    this.save()
-  }
-
-  private save() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(toJS(this.items)))
-    } catch { }
-  }
-
-  private load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
-      const arr = JSON.parse(raw)
-      if (Array.isArray(arr)) {
-        this.items = arr.map((x: any) => ({
-          id: String(x.id ?? crypto.randomUUID()),
-          name: String(x.name ?? ''),
-          endDate: String(x.endDate ?? ''),
-          amount: Number(x.amount ?? 0),
-          ratePercent: Number(x.ratePercent ?? 0),
-        }))
+  async remove(id: string) {
+    await axiosClient.delete(PATHS.USER_DEPOSITS.DELETE, {
+      params: {
+        depositId: id,
       }
+    })
+
+    await this.loadDeposits()
+  }
+
+  private async loadDeposits() {
+    runInAction(() => {
+      this.isLoading = true
+    })
+    try {
+      const userId = localStorage.getItem(USER_ID_KEY)
+      const resp = await axiosClient.get<{ userDeposits: Deposit[] }>(PATHS.USER_DEPOSITS.GET, { params: { userId } })
+      const userDeposits = resp?.data?.userDeposits
+
+      if (!userDeposits) return
+
+      runInAction(() => {
+        this.items = Array.isArray(userDeposits)
+          ? userDeposits
+          : []
+      })
+
     } catch {
       this.items = []
+    } finally {
+      runInAction(() => {
+        this.isLoading = false
+      })
     }
   }
 }

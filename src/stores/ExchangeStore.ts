@@ -28,7 +28,7 @@ export class ExchangeStore {
   async add(item: Pick<ExchangeAsset, "name" | "ticker" | "category" | "sector" | "quantity" | "boardName">) {
     const userId = localStorage.getItem(USER_ID_KEY)
 
-    await axiosClient.post(PATHS.USERS.ADD_ASSET, {
+    await axiosClient.post(PATHS.USER_ASSETS.ADD, {
       userId,
       ...item
     })
@@ -62,7 +62,7 @@ export class ExchangeStore {
     })
     try {
       const userId = localStorage.getItem(USER_ID_KEY)
-      const resp = await axiosClient.get<{ userAssets: ExchangeAsset[] }>(PATHS.USER_ASSETS.GET_ASSETS, { params: { userId } })
+      const resp = await axiosClient.get<{ userAssets: ExchangeAsset[] }>(PATHS.USER_ASSETS.GET, { params: { userId } })
       const userAssets = resp?.data?.userAssets
 
       if (!userAssets) return
