@@ -54,8 +54,6 @@ export class UnifiedAssetsStore {
       return sum + item.totalPrice
     }, 0)
 
-    console.log('depositValue', depositValue, depositStore.items)
-
     return {
       totalValue: depositValue + exchangeValue,
       depositValue,
@@ -77,8 +75,12 @@ export class UnifiedAssetsStore {
     depositStore.update(id, changes)
   }
 
-  updateExchange(id: string, changes: Partial<Omit<ExchangeAsset, 'id'>>) {
-    exchangeStore.update(id, changes)
+  updateExchangeQuantity(id: string, quantity: ExchangeAsset['quantity']) {
+    exchangeStore.updateAssetQuantity(id, quantity)
+  }
+
+  updateExchange(id: string, changes: Pick<ExchangeAsset, 'category' | 'sector' | 'comment'>) {
+    exchangeStore.updateAsset(id, changes)
   }
 
   removeDeposit(id: string) {

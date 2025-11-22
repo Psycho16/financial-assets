@@ -9,6 +9,8 @@ import {
   Typography
 } from '@mui/material'
 import type { DepositT, ExchangeT } from '../stores/UnifiedAssetsStore'
+import { exchangeStore } from '../stores/ExchangeStore'
+import { observer } from 'mobx-react-lite'
 
 interface QuantityDialogProps {
   open: boolean
@@ -20,7 +22,7 @@ interface QuantityDialogProps {
   operation: 'add' | 'subtract'
 }
 
-export const QuantityDialog = ({
+export const QuantityDialog = observer(function ({
   open,
   type,
   onClose,
@@ -28,19 +30,21 @@ export const QuantityDialog = ({
   assetName,
   currentQuantity,
   operation
-}: QuantityDialogProps) => {
-  const [quantity, setQuantity] = useState<number>(1)
+}: QuantityDialogProps) {
+  const [quantity, setQuantity] = useState("0")
 
   const handleConfirm = () => {
-    if (quantity > 0) {
-      onConfirm(quantity)
-      setQuantity(1)
-      onClose()
-    }
+    const quantityForSave = Number(quantity)
+    if (Number.isNaN(quantityForSave) || quantityForSave <= 0) return;
+
+    onConfirm(quantityForSave)
+    setQuantity("")
+    onClose()
+
   }
 
   const handleClose = () => {
-    setQuantity(1)
+    setQuantity("")
     onClose()
   }
 
@@ -72,8 +76,6 @@ export const QuantityDialog = ({
 
   const countType = type === "deposit" ? "р." : "шт."
 
-  const maxQuantity = operation === 'subtract' ? currentQuantity : undefined
-
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
@@ -90,16 +92,10 @@ export const QuantityDialog = ({
           autoFocus
           margin="dense"
           label={getLabelByType()}
-          type="number"
           fullWidth
           variant="outlined"
           value={quantity}
-          onChange={(e) => setQuantity(Math.max(0, Number(e.target.value)))}
-          inputProps={{
-            min: 1,
-            max: maxQuantity,
-            step: 1
-          }}
+          onChange={(e) => setQuantity(e.target.value)}
         />
       </DialogContent>
       <DialogActions>
@@ -107,11 +103,11 @@ export const QuantityDialog = ({
         <Button
           onClick={handleConfirm}
           variant="contained"
-          disabled={quantity <= 0 || (operation === 'subtract' && quantity > currentQuantity)}
+          disabled={Number.isNaN(Number(quantity)) || Number(quantity) <= 0 || (operation === 'subtract' && Number(quantity) > currentQuantity) || exchangeStore.isUpdateLoading}
         >
           {getButtonTextByType()}
         </Button>
       </DialogActions>
     </Dialog>
   )
-}
+})

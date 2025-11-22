@@ -1,10 +1,8 @@
 import { useState, useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
-import { unifiedAssetsStore, type DepositT, type ExchangeT, type UnifiedAsset, type UnifiedDepositAsset, type UnifiedExchangeAsset } from '../stores/UnifiedAssetsStore'
-import { type Deposit } from '../stores/DepositStore'
+import { unifiedAssetsStore, type UnifiedAsset, type UnifiedDepositAsset, type UnifiedExchangeAsset } from '../stores/UnifiedAssetsStore'
 import { exchangeStore, type ExchangeAsset } from '../stores/ExchangeStore'
 import styles from './UnifiedAssetsList.module.scss'
-import TextField from '@mui/material/TextField'
 import {
   Table,
   TableBody,
@@ -22,19 +20,10 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import RemoveIcon from '@mui/icons-material/Remove'
-// import EditIcon from '@mui/icons-material/Edit'
+import EditIcon from '@mui/icons-material/Edit'
 import { formatNumber } from '../utils/numberFormat'
 import { QuantityDialog } from './QuantityDialog'
-
-type EditingState = {
-  [id: string]: {
-    type: DepositT
-    data: Partial<Deposit>
-  } | {
-    type: ExchangeT
-    data: Partial<ExchangeAsset>
-  }
-}
+import { EditAssetDialog } from './EditAssetDialog'
 
 type SortField = 'name' | 'value' | 'type' | 'sector' | 'quantity' | 'category' | 'price'
 type SortDirection = 'asc' | 'desc'
@@ -46,7 +35,6 @@ type SortState = {
 
 export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
   const theme = useTheme()
-  const [editing, setEditing] = useState<EditingState>({})
 
   const [quantityDialog, setQuantityDialog] = useState<{
     open: boolean
@@ -59,12 +47,20 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
   })
   const [quantityDepositDialog, setQuantityDepositDialog] = useState<{
     open: boolean
-    asset: UnifiedDepositAsset | null
+    deposit: UnifiedDepositAsset | null
     operation: 'add' | 'subtract'
   }>({
     open: false,
-    asset: null,
+    deposit: null,
     operation: 'add'
+  })
+
+  const [editAssetDialog, setEditAssetDialog] = useState<{
+    open: boolean
+    asset: ExchangeAsset | null
+  }>({
+    open: true,
+    asset: null,
   })
 
   const [sortState, setSortState] = useState<SortState>({
@@ -72,79 +68,11 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     direction: 'desc'
   })
 
-
-  // const startEdit = (asset: UnifiedAsset) => {
-  //   if (asset.type === 'deposit') {
-  //     const deposit = asset.data
-  //     setEditing(prev => ({
-  //       ...prev,
-  //       [asset.id]: {
-  //         type: 'deposit',
-  //         data: {
-  //           name: deposit.name,
-  //           endDate: deposit.endDate,
-  //           amount: deposit.amount,
-  //           ratePercent: deposit.ratePercent,
-  //         }
-  //       }
-  //     }))
-  //   } else {
-  //     const exchange = asset.data
-  //     setEditing(prev => ({
-  //       ...prev,
-  //       [asset.id]: {
-  //         type: 'exchange',
-  //         data: {
-  //           name: exchange.name,
-  //           ticker: exchange.ticker ?? '',
-  //           category: exchange.category,
-  //           sector: exchange.sector,
-  //           quantity: exchange.quantity,
-  //         }
-  //       }
-  //     }))
-  //   }
-  // }
-
-  const cancelEdit = (id: string) => {
-    setEditing(prev => {
-      const copy = { ...prev }
-      delete copy[id]
-      return copy
+  const openEditAssetDialog = (asset: ExchangeAsset) => {
+    setEditAssetDialog({
+      open: true,
+      asset,
     })
-  }
-
-  const saveEdit = (id: string) => {
-    const editData = editing[id]
-    if (!editData) return
-
-    if (editData.type === 'deposit') {
-      const data = editData.data
-      const amt = Number(data.amount)
-      const rate = Number(data.ratePercent)
-      if (!Number.isFinite(amt) || amt <= 0 || !Number.isFinite(rate) || rate < 0) return
-
-      unifiedAssetsStore.updateDeposit(id, {
-        name: String(data.name ?? '').trim(),
-        endDate: String(data.endDate ?? ''),
-        amount: amt,
-        ratePercent: rate,
-      })
-    } else {
-      const data = editData.data
-      const qty = Number(data.quantity)
-      if (!Number.isFinite(qty) || qty <= 0) return
-
-      unifiedAssetsStore.updateExchange(id, {
-        name: String(data.name ?? '').trim(),
-        ticker: String(data.ticker ?? '').trim() || undefined,
-        category: String(data.category ?? 'Прочее').trim() || 'Прочее',
-        sector: String(data.sector ?? 'Прочее').trim() || 'Прочее',
-        quantity: qty,
-      })
-    }
-
-    cancelEdit(id)
   }
 
   const openQuantityDialog = (asset: UnifiedExchangeAsset, operation: 'add' | 'subtract') => {
@@ -155,18 +83,25 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     })
   }
 
-  const openQuantityDepositDialog = (asset: UnifiedDepositAsset, operation: 'add' | 'subtract') => {
+  const openQuantityDepositDialog = (deposit: UnifiedDepositAsset, operation: 'add' | 'subtract') => {
     setQuantityDepositDialog({
       open: true,
-      asset,
+      deposit,
       operation
+    })
+  }
+
+  const closeEditAssetDialog = () => {
+    setEditAssetDialog({
+      open: false,
+      asset: null,
     })
   }
 
   const closeQuantityDepositDialog = () => {
     setQuantityDepositDialog({
       open: false,
-      asset: null,
+      deposit: null,
       operation: 'add'
     })
   }
@@ -187,24 +122,28 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     const newQuantity = exchange.quantity + delta
 
     if (newQuantity >= 0) {
-      unifiedAssetsStore.updateExchange(quantityDialog.asset.id, {
-        quantity: newQuantity
-      })
+      unifiedAssetsStore.updateExchangeQuantity(quantityDialog.asset.id, newQuantity)
     }
   }
 
   const handleQuantityDepositChange = (quantity: number) => {
-    if (!quantityDepositDialog.asset || quantityDepositDialog.asset.type !== 'deposit') return
+    if (!quantityDepositDialog.deposit || quantityDepositDialog.deposit.type !== 'deposit') return
 
-    const deposit = quantityDepositDialog.asset.data
+    const deposit = quantityDepositDialog.deposit.data
     const delta = quantityDepositDialog.operation === 'add' ? quantity : -quantity
     const newQuantity = deposit.amount + delta
 
     if (newQuantity >= 0) {
-      unifiedAssetsStore.updateDeposit(quantityDepositDialog.asset.id, {
+      unifiedAssetsStore.updateDeposit(quantityDepositDialog.deposit.id, {
         amount: newQuantity
       })
     }
+  }
+
+  const handleAssetChange = (changes: Pick<ExchangeAsset, "sector" | "category" | "comment">) => {
+    if (!editAssetDialog?.asset?.id) return
+
+    unifiedAssetsStore.updateExchange(editAssetDialog.asset.id, changes)
   }
 
   const getAssetValue = (asset: UnifiedAsset): number => {
@@ -399,74 +338,9 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
             </TableHead>
             <TableBody>
               {sortedAssets.map(asset => {
-                const editData = editing[asset.id]
-                const isEditing = Boolean(editData)
                 const assetValue = getAssetValue(asset)
-
-                if (isEditing) {
-                  if (editData.type === 'deposit') {
-                    return (
-                      <TableRow key={`${asset.type}-${asset.id}`}>
-                        <TableCell>
-                          <div className={`${styles.typeBadge} ${styles.typeDeposit}`}>Вклад</div>
-                        </TableCell>
-                        <TableCell>
-                          <TextField size="small" label="Название" value={String(editData.data.name ?? '')} onChange={ev => setEditing(s => ({ ...s, [asset.id]: { ...s[asset.id], data: { ...s[asset.id].data, name: ev.target.value } } }))} />
-                        </TableCell>
-                        <TableCell>
-                          <TextField size="small" label="Дата окончания" type="date" value={String(editData.data.endDate ?? '')} onChange={ev => setEditing(s => ({ ...s, [asset.id]: { ...s[asset.id], data: { ...s[asset.id].data, endDate: ev.target.value } } }))} InputLabelProps={{ shrink: true }} />
-                        </TableCell>
-                        <TableCell >
-                          <TextField size="small" label="Процент, %" type="number" value={String(editData.data.ratePercent ?? '')} onChange={ev => setEditing(s => ({ ...s, [asset.id]: { ...s[asset.id], data: { ...s[asset.id].data, ratePercent: Number(ev.target.value) } } }))} />
-                        </TableCell>
-                        <TableCell >
-                          <TextField size="small" label="Сумма" type="number" value={String(editData.data.amount ?? '')} onChange={ev => setEditing(s => ({ ...s, [asset.id]: { ...s[asset.id], data: { ...s[asset.id].data, amount: Number(ev.target.value) } } }))} />
-                        </TableCell>
-                        <TableCell >
-                          <div className={styles.actions}>
-                            <button onClick={() => saveEdit(asset.id)} className={styles.save}>Сохранить</button>
-                            <button onClick={() => cancelEdit(asset.id)} className={styles.cancel}>Отмена</button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  }
-
-                  return (
-                    <TableRow key={`${asset.type}-${asset.id}`}>
-                      <TableCell>
-                        <div className={`${styles.typeBadge} ${styles.typeExchange}`}>Актив</div>
-                      </TableCell>
-                      <TableCell>
-                        <TextField size="small" label="Название" value={String(editData.data.name ?? '')} onChange={ev => setEditing(s => ({ ...s, [asset.id]: { ...s[asset.id], data: { ...s[asset.id].data, name: ev.target.value } } }))} />
-                      </TableCell>
-                      <TableCell>
-                        <TextField size="small" label="Категория" value={String(editData.data.category ?? '')} onChange={ev => setEditing(s => ({ ...s, [asset.id]: { ...s[asset.id], data: { ...s[asset.id].data, category: ev.target.value } } }))} />
-                      </TableCell>
-                      <TableCell>
-                        <TextField size="small" label="Отрасль" value={String(editData.data.sector ?? '')} onChange={ev => setEditing(s => ({ ...s, [asset.id]: { ...s[asset.id], data: { ...s[asset.id].data, sector: ev.target.value } } }))} />
-                      </TableCell>
-                      <TableCell >
-                        <TextField size="small" label="Количество" type="number" inputProps={{ min: '0', step: '1' }} value={String(editData.data.quantity ?? '')} onChange={ev => setEditing(s => ({ ...s, [asset.id]: { ...s[asset.id], data: { ...s[asset.id].data, quantity: Number(ev.target.value) } } }))} />
-                      </TableCell>
-                      <TableCell />
-                      <TableCell />
-                      <TableCell >
-                        <div className={styles.actions}>
-                          <button onClick={() => saveEdit(asset.id)} className={styles.save}>Сохранить</button>
-                          <button onClick={() => cancelEdit(asset.id)} className={styles.cancel}>Отмена</button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                }
-
-                // view mode
                 return (
-                  <TableRow key={`${asset.type}-${asset.id}`}
-                  // style={asset.type === 'deposit' ? undefined : { cursor: "pointer" }}
-                  // onClick={asset.type === 'deposit' ? undefined : () => setactiveTicker(asset?.data.ticker || null)}
-                  >
+                  <TableRow key={`${asset.type}-${asset.id}`}>
                     <TableCell>
                       <div className={`${styles.typeBadge} ${asset.type === 'deposit' ? styles.typeDeposit : styles.typeExchange}`}>
                         {asset.type === 'deposit' ? 'Вклад' : 'Актив'}
@@ -556,12 +430,12 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                               }}>
                               <RemoveIcon />
                             </IconButton>
-                            {/* <IconButton aria-label="edit" onClick={(e) => {
+                            <IconButton aria-label="edit" onClick={(e) => {
                               e.stopPropagation()
-                              startEdit(asset)
+                              openEditAssetDialog(asset.data)
                             }}>
                               <EditIcon />
-                            </IconButton> */}
+                            </IconButton>
                             <IconButton
                               aria-label="delete"
                               onClick={(e) => {
@@ -613,15 +487,24 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
         />
       )}
 
-      {quantityDepositDialog.asset && (
+      {quantityDepositDialog.deposit && (
         <QuantityDialog
           open={quantityDepositDialog.open}
           onClose={closeQuantityDepositDialog}
           onConfirm={handleQuantityDepositChange}
-          type={quantityDepositDialog.asset.type}
-          assetName={quantityDepositDialog.asset.data.name}
-          currentQuantity={quantityDepositDialog.asset.data.amount}
+          type={quantityDepositDialog.deposit.type}
+          assetName={quantityDepositDialog.deposit.data.name}
+          currentQuantity={quantityDepositDialog.deposit.data.amount}
           operation={quantityDepositDialog.operation}
+        />
+      )}
+
+      {editAssetDialog.asset && (
+        <EditAssetDialog
+          open={editAssetDialog.open}
+          onClose={closeEditAssetDialog}
+          onConfirm={handleAssetChange}
+          asset={editAssetDialog.asset}
         />
       )}
     </>

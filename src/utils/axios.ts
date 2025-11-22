@@ -14,6 +14,7 @@ export const PATHS = {
     ADD: "user-assets/add-asset",
     GET: "user-assets/",
     EDIT_QUANTITY: "user-assets/edit-asset-quantity",
+    EDIT_ASSET: "user-assets/edit-asset",
     DELETE: "user-assets/delete-asset",
   },
   USER_DEPOSITS: {

@@ -14,46 +14,135 @@ export type ExchangeAsset = {
   quantity: number
   sector: string
   ticker: string
+  comment: string
 }
+
+type UpdatedAsset = Omit<ExchangeAsset, "totalPrice" | "changePercent" | "price">
+
+const recalculateTotalPrice = (price: number, quantity: number) => {
+  return price * quantity
+}
+
+const isResponseSuccess = (statusCode: number) => statusCode === 200
 
 export class ExchangeStore {
   items: ExchangeAsset[] = []
   isLoading = false
+  isUpdateLoading = false
 
   constructor() {
     makeAutoObservable(this)
     this.loadAssets()
   }
 
-  async add(item: Pick<ExchangeAsset, "name" | "ticker" | "category" | "sector" | "quantity" | "boardName">) {
+  async add(item: Pick<ExchangeAsset, "name" | "ticker" | "category" | "sector" | "quantity" | "boardName" | "comment">) {
     const userId = localStorage.getItem(USER_ID_KEY)
-
+    runInAction(() => {
+      this.isLoading = true
+    })
     await axiosClient.post(PATHS.USER_ASSETS.ADD, {
       userId,
       ...item
     })
 
-    await this.loadAssets()
-
-  }
-
-  async update(id: string, changes: Partial<Omit<ExchangeAsset, 'id'>>) {
-    await axiosClient.patch(PATHS.USER_ASSETS.EDIT_QUANTITY, {
-      assetId: id,
-      quantity: changes.quantity,
+    runInAction(() => {
+      this.isLoading = false
     })
 
     await this.loadAssets()
   }
 
+  async updateAssetQuantity(id: string, quantity: ExchangeAsset['quantity']) {
+    runInAction(() => {
+      this.isUpdateLoading = true
+    })
+    const resp = await axiosClient.patch<UpdatedAsset>(PATHS.USER_ASSETS.EDIT_QUANTITY, {
+      assetId: id,
+      quantity,
+    })
+
+    const updatedAsset = resp.data
+    const isSuccess = isResponseSuccess(resp.status)
+
+    if (!!updatedAsset && isSuccess) {
+      runInAction(() => {
+        this.items = this.items.map<ExchangeAsset>((item) => {
+          if (item.id === updatedAsset.id) {
+            return {
+              ...updatedAsset,
+              changePercent: item.changePercent,
+              price: item.price,
+              totalPrice: recalculateTotalPrice(item.price, updatedAsset.quantity)
+            }
+          }
+
+          return {
+            ...item
+          }
+        })
+      })
+    }
+
+    runInAction(() => {
+      this.isUpdateLoading = false
+    })
+
+  }
+
+  async updateAsset(id: string, changes: Pick<ExchangeAsset, 'category' | 'sector' | 'comment'>) {
+    runInAction(() => {
+      this.isUpdateLoading = true
+    })
+
+    const resp = await axiosClient.patch<UpdatedAsset>(PATHS.USER_ASSETS.EDIT_ASSET, {
+      assetId: id,
+      category: changes.category,
+      sector: changes.sector,
+      comment: changes.comment,
+    })
+
+    const updatedAsset = resp.data
+    const isSuccess = isResponseSuccess(resp.status)
+
+    if (!!updatedAsset && isSuccess) {
+      runInAction(() => {
+        this.items = this.items.map<ExchangeAsset>((item) => {
+          if (item.id === updatedAsset.id) {
+            return {
+              ...updatedAsset,
+              changePercent: item.changePercent,
+              price: item.price,
+              totalPrice: item.totalPrice
+            }
+          }
+
+          return {
+            ...item
+          }
+        })
+      })
+    }
+
+    runInAction(() => {
+      this.isUpdateLoading = false
+    })
+
+  }
+
   async remove(id: string) {
-    await axiosClient.delete(PATHS.USER_ASSETS.DELETE, {
+    const resp = await axiosClient.delete(PATHS.USER_ASSETS.DELETE, {
       params: {
         assetId: id,
       }
     })
 
-    await this.loadAssets()
+    const isSuccess = isResponseSuccess(resp.status)
+
+    if (!isSuccess) return
+
+    runInAction(() => {
+      this.items = this.items.filter(item => item.id !== id)
+    })
   }
 
   private async loadAssets() {

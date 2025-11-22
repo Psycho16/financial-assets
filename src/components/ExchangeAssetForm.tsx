@@ -2,21 +2,23 @@ import { type FormEvent, useState } from 'react'
 import TextField from '@mui/material/TextField'
 import { exchangeStore } from '../stores/ExchangeStore'
 import styles from './ExchangeAssetForm.module.scss'
-import { Autocomplete, Box, CircularProgress } from '@mui/material'
+import { Autocomplete, Box, Button, CircularProgress } from '@mui/material'
 import { debounce } from '../utils/debounce'
 import type { TickerOption } from '../types/asset'
 import { axiosClient, PATHS } from '../utils/axios'
+import { observer } from 'mobx-react-lite'
 
 const splitSymbol = '%'
 type Option = { name: string, boardName: string }
 
-export function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }) {
+export const ExchangeAssetForm = observer(function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }) {
   const [name, setName] = useState('')
   const [ticker, setTicker] = useState('')
   const [category, setCategory] = useState('')
   const [sector, setSector] = useState('')
   const [quantity, setQuantity] = useState('')
   const [boardName, setBoardName] = useState('')
+  const [comment, setComment] = useState('')
 
   const [options, setOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,6 +60,7 @@ export function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }
       sector: sector.trim() || 'Прочее',
       quantity: qty,
       boardName: boardName.trim(),
+      comment: comment.trim(),
     }
 
     await exchangeStore.add(newAsset)
@@ -68,15 +71,25 @@ export function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }
     setSector('')
     setQuantity('')
     setBoardName('')
+    setComment('')
     onCloseModal()
+  }
+
+  const isRequiredFieldsEmpty = (): boolean => {
+    return !name ||
+      !ticker ||
+      !category ||
+      !sector ||
+      !quantity ||
+      !boardName
   }
 
   return (
     <form className={styles.form} onSubmit={onSubmit}>
       <div className={styles.actions}>
-        <button type="submit" className={styles.submit}>Добавить биржевой актив</button>
+        <Button type="submit" variant="contained" disabled={isRequiredFieldsEmpty() || exchangeStore.isLoading}>Добавить биржевой актив</Button>
       </div>
-      <div className={styles.row}>
+      <div className={styles.gridContainer}>
         <Autocomplete
           options={options}
           loading={loading}
@@ -126,6 +139,7 @@ export function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }
           renderInput={(params) => (
             <TextField
               {...params}
+              className={styles.gridItem}
               label="Тикер/Название"
               variant="outlined"
               InputProps={{
@@ -140,13 +154,14 @@ export function ExchangeAssetForm({ onCloseModal }: { onCloseModal: () => void }
             />
           )}
         />
-        <TextField label="Категория" value={category} onChange={e => setCategory(e.target.value)} placeholder="Напр. Акции" size="medium" />
-        <TextField label="Отрасль" value={sector} onChange={e => setSector(e.target.value)} placeholder="Напр. Финансы" size="medium" />
-        <TextField label="Количество паев/бумаг" type="number" inputProps={{ min: '0', step: '1' }} value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="Напр. 10" size="medium" />
+        <TextField className={styles.gridItem} label="Категория" value={category} onChange={e => setCategory(e.target.value)} placeholder="Напр. Акции" size="medium" />
+        <TextField className={styles.gridItem} label="Отрасль" value={sector} onChange={e => setSector(e.target.value)} placeholder="Напр. Финансы" size="medium" />
+        <TextField className={styles.gridItem} label="Количество паев/бумаг" type="number" inputProps={{ min: '0', step: '1' }} value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="Напр. 10" size="medium" />
+        <TextField className={styles.gridItem} sx={{ gridColumn: "1 / -1" }} fullWidth multiline label="Комментарий" value={comment} onChange={e => setComment(e.target.value)} placeholder="Почему эта бумага есть в вашем портфеле?" size="medium" />
       </div>
     </form>
   )
-}
+})
 
 
 
