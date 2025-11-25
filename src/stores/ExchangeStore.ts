@@ -28,7 +28,7 @@ const isResponseSuccess = (statusCode: number) => statusCode === 200
 export class ExchangeStore {
   items: ExchangeAsset[] = []
   isLoading = false
-  isUpdateLoading = false
+  updatingAssetList = new Set()
 
   constructor() {
     makeAutoObservable(this)
@@ -54,7 +54,8 @@ export class ExchangeStore {
 
   async updateAssetQuantity(id: string, quantity: ExchangeAsset['quantity']) {
     runInAction(() => {
-      this.isUpdateLoading = true
+      this.updatingAssetList.add(id)
+      this.updatingAssetList = this.updatingAssetList
     })
     const resp = await axiosClient.patch<UpdatedAsset>(PATHS.USER_ASSETS.EDIT_QUANTITY, {
       assetId: id,
@@ -84,14 +85,16 @@ export class ExchangeStore {
     }
 
     runInAction(() => {
-      this.isUpdateLoading = false
+      this.updatingAssetList.delete(id)
+      this.updatingAssetList = this.updatingAssetList
     })
 
   }
 
   async updateAsset(id: string, changes: Pick<ExchangeAsset, 'category' | 'sector' | 'comment'>) {
     runInAction(() => {
-      this.isUpdateLoading = true
+      this.updatingAssetList.add(id)
+      this.updatingAssetList = this.updatingAssetList
     })
 
     const resp = await axiosClient.patch<UpdatedAsset>(PATHS.USER_ASSETS.EDIT_ASSET, {
@@ -124,12 +127,18 @@ export class ExchangeStore {
     }
 
     runInAction(() => {
-      this.isUpdateLoading = false
+      this.updatingAssetList.delete(id)
+      this.updatingAssetList = this.updatingAssetList
     })
 
   }
 
   async remove(id: string) {
+    runInAction(() => {
+      this.updatingAssetList.add(id)
+      this.updatingAssetList = this.updatingAssetList
+    })
+
     const resp = await axiosClient.delete(PATHS.USER_ASSETS.DELETE, {
       params: {
         assetId: id,
@@ -137,7 +146,10 @@ export class ExchangeStore {
     })
 
     const isSuccess = isResponseSuccess(resp.status)
-
+    runInAction(() => {
+      this.updatingAssetList.delete(id)
+      this.updatingAssetList = this.updatingAssetList
+    })
     if (!isSuccess) return
 
     runInAction(() => {

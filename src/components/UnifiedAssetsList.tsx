@@ -412,39 +412,43 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                           {formatNumber(assetValue)} р
                         </TableCell>
                         <TableCell>
-                          <div className={styles.actions}>
-                            <IconButton
-                              aria-label="add"
-                              onClick={(e) => {
+                          {exchangeStore.updatingAssetList.has(asset.id) ?
+                            <CircularProgress />
+                            :
+                            <div className={styles.actions}>
+                              <IconButton
+                                aria-label="add"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  openQuantityDialog(asset, 'add')
+                                }}
+                              >
+                                <AddIcon />
+                              </IconButton>
+                              <IconButton
+                                aria-label="delete"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  openQuantityDialog(asset, 'subtract')
+                                }}>
+                                <RemoveIcon />
+                              </IconButton>
+                              <IconButton aria-label="edit" onClick={(e) => {
                                 e.stopPropagation()
-                                openQuantityDialog(asset, 'add')
-                              }}
-                            >
-                              <AddIcon />
-                            </IconButton>
-                            <IconButton
-                              aria-label="delete"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                openQuantityDialog(asset, 'subtract')
+                                openEditAssetDialog(asset.data)
                               }}>
-                              <RemoveIcon />
-                            </IconButton>
-                            <IconButton aria-label="edit" onClick={(e) => {
-                              e.stopPropagation()
-                              openEditAssetDialog(asset.data)
-                            }}>
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton
-                              aria-label="delete"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                unifiedAssetsStore.removeAsset(asset.id, asset.type)
-                              }}>
-                              <DeleteIcon />
-                            </IconButton>
-                          </div>
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                aria-label="delete"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  unifiedAssetsStore.removeAsset(asset.id, asset.type)
+                                }}>
+                                <DeleteIcon />
+                              </IconButton>
+                            </div>
+                          }
                         </TableCell>
                       </>
                     )}

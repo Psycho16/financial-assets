@@ -1,7 +1,6 @@
 import { useState } from "react"
-import { exchangeStore, type ExchangeAsset } from "../stores/ExchangeStore"
+import { type ExchangeAsset } from "../stores/ExchangeStore"
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextField } from "@mui/material"
-import { observer } from "mobx-react-lite"
 
 interface EditAssetDialogProps {
   open: boolean
@@ -9,12 +8,12 @@ interface EditAssetDialogProps {
   onConfirm: (changes: Pick<ExchangeAsset, 'category' | 'sector' | 'comment'>) => void
   asset: ExchangeAsset
 }
-export const EditAssetDialog = observer(function EditAssetDialog({
+export const EditAssetDialog = ({
   open,
   asset,
   onClose,
   onConfirm,
-}: EditAssetDialogProps) {
+}: EditAssetDialogProps) => {
   const [sector, setSector] = useState(asset.sector)
   const [comment, setComment] = useState(asset.comment)
   const [category, setCategory] = useState(asset.category)
@@ -28,6 +27,7 @@ export const EditAssetDialog = observer(function EditAssetDialog({
     onClose()
   }
 
+  const initialDataIsSame = asset.sector === sector && asset.comment === comment && asset.category === category
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -69,11 +69,11 @@ export const EditAssetDialog = observer(function EditAssetDialog({
         <Button
           onClick={handleConfirm}
           variant="contained"
-          disabled={exchangeStore.isUpdateLoading}
+          disabled={initialDataIsSame}
         >
           {"Изменить"}
         </Button>
       </DialogActions>
     </Dialog>
   )
-})
+}

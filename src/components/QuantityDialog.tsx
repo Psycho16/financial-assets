@@ -9,8 +9,6 @@ import {
   Typography
 } from '@mui/material'
 import type { DepositT, ExchangeT } from '../stores/UnifiedAssetsStore'
-import { exchangeStore } from '../stores/ExchangeStore'
-import { observer } from 'mobx-react-lite'
 
 interface QuantityDialogProps {
   open: boolean
@@ -22,7 +20,7 @@ interface QuantityDialogProps {
   operation: 'add' | 'subtract'
 }
 
-export const QuantityDialog = observer(function ({
+export const QuantityDialog = ({
   open,
   type,
   onClose,
@@ -30,7 +28,7 @@ export const QuantityDialog = observer(function ({
   assetName,
   currentQuantity,
   operation
-}: QuantityDialogProps) {
+}: QuantityDialogProps) => {
   const [quantity, setQuantity] = useState("0")
 
   const handleConfirm = () => {
@@ -40,7 +38,6 @@ export const QuantityDialog = observer(function ({
     onConfirm(quantityForSave)
     setQuantity("")
     onClose()
-
   }
 
   const handleClose = () => {
@@ -103,11 +100,11 @@ export const QuantityDialog = observer(function ({
         <Button
           onClick={handleConfirm}
           variant="contained"
-          disabled={Number.isNaN(Number(quantity)) || Number(quantity) <= 0 || (operation === 'subtract' && Number(quantity) > currentQuantity) || exchangeStore.isUpdateLoading}
+          disabled={Number.isNaN(Number(quantity)) || Number(quantity) <= 0 || (operation === 'subtract' && Number(quantity) > currentQuantity)}
         >
           {getButtonTextByType()}
         </Button>
       </DialogActions>
     </Dialog>
   )
-})
+}
