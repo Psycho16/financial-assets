@@ -74,7 +74,11 @@ export class UnifiedAssetsStore {
   updateDeposit(id: string, changes: Partial<Omit<Deposit, 'id'>>) {
     depositStore.update(id, changes)
   }
-
+////
+  updateDepositDialog(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
+    depositStore.updateDepositDialog(id, changes)
+  }
+//////
   updateExchangeQuantity(id: string, quantity: ExchangeAsset['quantity']) {
     exchangeStore.updateAssetQuantity(id, quantity)
   }
@@ -82,6 +86,8 @@ export class UnifiedAssetsStore {
   updateExchange(id: string, changes: Pick<ExchangeAsset, 'category' | 'sector' | 'comment'>) {
     exchangeStore.updateAsset(id, changes)
   }
+
+  
 
   removeDeposit(id: string) {
     depositStore.remove(id)

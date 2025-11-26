@@ -24,6 +24,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import { formatNumber } from '../utils/numberFormat'
 import { QuantityDialog } from './QuantityDialog'
 import { EditAssetDialog } from './EditAssetDialog'
+import type { Deposit } from '../stores/DepositStore'
+import { EditDepositDialog } from './EditDepositDialog'
 
 type SortField = 'name' | 'value' | 'type' | 'sector' | 'quantity' | 'category' | 'price'
 type SortDirection = 'asc' | 'desc'
@@ -63,6 +65,14 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     asset: null,
   })
 
+   const [editDepositDialog, setEditDepositDialog] = useState<{
+    open: boolean
+    deposit: Deposit | null
+  }>({
+    open: true,
+    deposit: null,
+  })
+
   const [sortState, setSortState] = useState<SortState>({
     field: 'value',
     direction: 'desc'
@@ -72,6 +82,13 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     setEditAssetDialog({
       open: true,
       asset,
+    })
+  }
+
+  const openEditDepositDialog = (deposit: Deposit) => {
+    setEditDepositDialog({
+      open: true,
+      deposit,
     })
   }
 
@@ -95,6 +112,13 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     setEditAssetDialog({
       open: false,
       asset: null,
+    })
+  }
+
+  const closeEditDepositDialog = () => {
+    setEditDepositDialog({
+      open: false,
+      deposit: null,
     })
   }
 
@@ -145,6 +169,13 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
 
     unifiedAssetsStore.updateExchange(editAssetDialog.asset.id, changes)
   }
+
+  const handleDepositChange = (changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) => {
+     if (!editDepositDialog?.deposit?.id) return
+
+    unifiedAssetsStore.updateDeposit(editDepositDialog.deposit.id, changes)
+  }
+ 
 
   const getAssetValue = (asset: UnifiedAsset): number => {
     if (asset.type === 'deposit') {
@@ -375,9 +406,9 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                               }}>
                               <RemoveIcon />
                             </IconButton>
-                            {/* <IconButton aria-label="edit" onClick={() => startEdit(asset)}>
+                            <IconButton aria-label="edit" onClick={() => openEditDepositDialog(asset.data)}>
                               <EditIcon />
-                            </IconButton> */}
+                            </IconButton>
                             <IconButton
                               aria-label="delete"
                               onClick={() => unifiedAssetsStore.removeAsset(asset.id, asset.type)}>
@@ -509,6 +540,15 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
           onClose={closeEditAssetDialog}
           onConfirm={handleAssetChange}
           asset={editAssetDialog.asset}
+        />
+      )}
+
+        {editDepositDialog.deposit && (
+        <EditDepositDialog
+          open={editDepositDialog.open}
+          onClose={closeEditDepositDialog}
+          onConfirm={handleDepositChange}
+          deposit={editDepositDialog.deposit}
         />
       )}
     </>
