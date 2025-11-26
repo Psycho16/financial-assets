@@ -71,14 +71,14 @@ export class UnifiedAssetsStore {
     exchangeStore.add(item)
   }
 
-  updateDeposit(id: string, changes: Partial<Omit<Deposit, 'id'>>) {
+  updateDepositAmount(id: string, changes: Partial<Omit<Deposit, 'id'>>) {
     depositStore.update(id, changes)
   }
-////
-  updateDepositDialog(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
-    depositStore.updateDepositDialog(id, changes)
+
+  updateDeposit(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
+    depositStore.updateDeposit(id, changes)
   }
-//////
+
   updateExchangeQuantity(id: string, quantity: ExchangeAsset['quantity']) {
     exchangeStore.updateAssetQuantity(id, quantity)
   }

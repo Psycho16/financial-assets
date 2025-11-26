@@ -24,7 +24,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import { formatNumber } from '../utils/numberFormat'
 import { QuantityDialog } from './QuantityDialog'
 import { EditAssetDialog } from './EditAssetDialog'
-import type { Deposit } from '../stores/DepositStore'
+import { depositStore, type Deposit } from '../stores/DepositStore'
 import { EditDepositDialog } from './EditDepositDialog'
 
 type SortField = 'name' | 'value' | 'type' | 'sector' | 'quantity' | 'category' | 'price'
@@ -158,7 +158,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     const newQuantity = deposit.amount + delta
 
     if (newQuantity >= 0) {
-      unifiedAssetsStore.updateDeposit(quantityDepositDialog.deposit.id, {
+      unifiedAssetsStore.updateDepositAmount(quantityDepositDialog.deposit.id, {
         amount: newQuantity
       })
     }
@@ -388,6 +388,9 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                         <TableCell />
                         <TableCell className={styles.cellMono} title={formatNumber(asset.data.amount)}>{formatNumber(asset.data.amount)} р</TableCell>
                         <TableCell >
+                          {depositStore.updatingDepositList.has(asset.id) ? 
+                          <CircularProgress/>
+                          :
                           <div className={styles.actions}>
                             <IconButton
                               aria-label="add"
@@ -414,7 +417,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                               onClick={() => unifiedAssetsStore.removeAsset(asset.id, asset.type)}>
                               <DeleteIcon />
                             </IconButton>
-                          </div>
+                          </div>}
                         </TableCell>
                       </>
                     ) : (

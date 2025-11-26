@@ -10,7 +10,7 @@ export type Deposit = {
   ratePercent: number
 }
 
-type UpdatedDeposit = Omit<Deposit, "name" | "endDate" | "ratePercent">
+// type UpdatedDeposit = <Deposit, "name" | "endDate" | "ratePercent">
 
 const isResponseSuccess = (statusCode: number) => statusCode === 200
 
@@ -46,43 +46,37 @@ export class DepositStore {
     await this.loadDeposits()
   }
   
-  
-  
-  /////// Должен выполняться апдейт полей ////////
-      async updateDepositDialog(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
-        runInAction(() => {
+  async updateDeposit(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
+    runInAction(() => {
           this.updatingDepositList.add(id)
           this.updatingDepositList = this.updatingDepositList
-        
         })
         
-        // const resp = await axiosClient.patch<UpdatedDeposit>(PATHS.USER_ASSETS.EDIT_ASSET, {
-        //   depositId: id,
-        //   name: changes.name,
-        //   endDate: changes.endDate,
-        //   ratePercent: changes.ratePercent,
-        
-        // })
+        const resp = await axiosClient.patch<Deposit>(PATHS.USER_DEPOSITS.EDIT_DEPOSIT, {
+          depositId: id,
+          name: changes.name,
+          endDate: changes.endDate,
+          ratePercent: changes.ratePercent,
+        })
     
-        // const updatedDeposit = resp.data
-        // const isSuccess = isResponseSuccess(resp.status)
-    
-        // if (!!updatedDeposit && isSuccess) {
-        //   runInAction(() => {
-        //     this.items = this.items.map<Deposit>((item) => {
-        //       if (item.id === updatedDeposit.id) {
-        //         return {
-        //           ...updatedDeposit,
-        //           changeName: item.name
-        //         }
-        //       }
-    
-        //       return {
-        //         ...item
-        //       }
-        //     })
-        //   })
-        // }
+        const updatedDeposit = resp.data
+        const isSuccess = isResponseSuccess(resp.status)
+
+        if (!!updatedDeposit && isSuccess) {
+          runInAction(() => {
+            this.items = this.items.map<Deposit>((item) => {
+              if (item.id === updatedDeposit.id) {
+                return {
+                  ...updatedDeposit,
+                }
+              }
+
+              return {
+                ...item
+              }
+            })
+          })
+        }
     
         runInAction(() => {
           this.updatingDepositList.delete(id)
