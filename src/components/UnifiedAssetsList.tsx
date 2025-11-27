@@ -61,7 +61,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     open: boolean
     asset: ExchangeAsset | null
   }>({
-    open: true,
+    open: false,
     asset: null,
   })
 
@@ -69,7 +69,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     open: boolean
     deposit: Deposit | null
   }>({
-    open: true,
+    open: false,
     deposit: null,
   })
 
@@ -173,7 +173,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
   const handleDepositChange = (changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) => {
      if (!editDepositDialog?.deposit?.id) return
 
-    unifiedAssetsStore.updateDeposit(editDepositDialog.deposit.id, changes)
+    unifiedAssetsStore.updateAmount(editDepositDialog.deposit.id, changes)
   }
  
 

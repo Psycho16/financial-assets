@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { USER_ID_KEY } from '../constants/localStorage'
 import { axiosClient, PATHS } from '../utils/axios'
+import { isResponseSuccess } from '../utils/isResponseSuccess'
 
 export type Deposit = {
   id: string
@@ -9,11 +10,6 @@ export type Deposit = {
   amount: number
   ratePercent: number
 }
-
-// type UpdatedDeposit = <Deposit, "name" | "endDate" | "ratePercent">
-
-const isResponseSuccess = (statusCode: number) => statusCode === 200
-
 
 
 export class DepositStore {

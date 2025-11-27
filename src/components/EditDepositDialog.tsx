@@ -42,8 +42,7 @@ export const EditDepositDialog = ({
               fullWidth
               variant="outlined"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              
+              onChange={(e) => setName(e.target.value)} 
             />
             <TextField
               margin="dense"

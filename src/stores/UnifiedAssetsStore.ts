@@ -75,7 +75,7 @@ export class UnifiedAssetsStore {
     depositStore.update(id, changes)
   }
 
-  updateDeposit(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
+  updateAmount(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
     depositStore.updateDeposit(id, changes)
   }
 

@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { USER_ID_KEY } from '../constants/localStorage'
 import { axiosClient, PATHS } from '../utils/axios'
+import { isResponseSuccess } from '../utils/isResponseSuccess'
 
 export type ExchangeAsset = {
   id: string
@@ -23,7 +24,6 @@ const recalculateTotalPrice = (price: number, quantity: number) => {
   return price * quantity
 }
 
-const isResponseSuccess = (statusCode: number) => statusCode === 200
 
 export class ExchangeStore {
   items: ExchangeAsset[] = []
