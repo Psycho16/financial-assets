@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { USER_ID_KEY } from '../constants/localStorage'
 import { axiosClient, PATHS } from '../utils/axios'
+import { isResponseSuccess } from '../utils/isResponseSuccess'
 
 export type Deposit = {
   id: string
@@ -9,9 +10,12 @@ export type Deposit = {
   amount: number
   ratePercent: number
 }
+
+
 export class DepositStore {
   items: Deposit[] = []
   isLoading = false
+  updatingDepositList = new Set()
 
   constructor() {
     makeAutoObservable(this)
@@ -37,6 +41,45 @@ export class DepositStore {
 
     await this.loadDeposits()
   }
+  
+  async updateDeposit(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
+    runInAction(() => {
+          this.updatingDepositList.add(id)
+          this.updatingDepositList = this.updatingDepositList
+        })
+        
+        const resp = await axiosClient.patch<Deposit>(PATHS.USER_DEPOSITS.EDIT_DEPOSIT, {
+          depositId: id,
+          name: changes.name,
+          endDate: changes.endDate,
+          ratePercent: changes.ratePercent,
+        })
+    
+        const updatedDeposit = resp.data
+        const isSuccess = isResponseSuccess(resp.status)
+
+        if (!!updatedDeposit && isSuccess) {
+          runInAction(() => {
+            this.items = this.items.map<Deposit>((item) => {
+              if (item.id === updatedDeposit.id) {
+                return {
+                  ...updatedDeposit,
+                }
+              }
+
+              return {
+                ...item
+              }
+            })
+          })
+        }
+    
+        runInAction(() => {
+          this.updatingDepositList.delete(id)
+          this.updatingDepositList = this.updatingDepositList
+        })
+    
+      }
 
   async remove(id: string) {
     await axiosClient.delete(PATHS.USER_DEPOSITS.DELETE, {

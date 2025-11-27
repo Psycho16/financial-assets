@@ -24,6 +24,8 @@ import EditIcon from '@mui/icons-material/Edit'
 import { formatNumber } from '../utils/numberFormat'
 import { QuantityDialog } from './QuantityDialog'
 import { EditAssetDialog } from './EditAssetDialog'
+import { depositStore, type Deposit } from '../stores/DepositStore'
+import { EditDepositDialog } from './EditDepositDialog'
 
 type SortField = 'name' | 'value' | 'type' | 'sector' | 'quantity' | 'category' | 'price'
 type SortDirection = 'asc' | 'desc'
@@ -59,8 +61,16 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     open: boolean
     asset: ExchangeAsset | null
   }>({
-    open: true,
+    open: false,
     asset: null,
+  })
+
+   const [editDepositDialog, setEditDepositDialog] = useState<{
+    open: boolean
+    deposit: Deposit | null
+  }>({
+    open: false,
+    deposit: null,
   })
 
   const [sortState, setSortState] = useState<SortState>({
@@ -72,6 +82,13 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     setEditAssetDialog({
       open: true,
       asset,
+    })
+  }
+
+  const openEditDepositDialog = (deposit: Deposit) => {
+    setEditDepositDialog({
+      open: true,
+      deposit,
     })
   }
 
@@ -95,6 +112,13 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     setEditAssetDialog({
       open: false,
       asset: null,
+    })
+  }
+
+  const closeEditDepositDialog = () => {
+    setEditDepositDialog({
+      open: false,
+      deposit: null,
     })
   }
 
@@ -134,7 +158,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     const newQuantity = deposit.amount + delta
 
     if (newQuantity >= 0) {
-      unifiedAssetsStore.updateDeposit(quantityDepositDialog.deposit.id, {
+      unifiedAssetsStore.updateDepositAmount(quantityDepositDialog.deposit.id, {
         amount: newQuantity
       })
     }
@@ -145,6 +169,13 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
 
     unifiedAssetsStore.updateExchange(editAssetDialog.asset.id, changes)
   }
+
+  const handleDepositChange = (changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) => {
+     if (!editDepositDialog?.deposit?.id) return
+
+    unifiedAssetsStore.updateAmount(editDepositDialog.deposit.id, changes)
+  }
+ 
 
   const getAssetValue = (asset: UnifiedAsset): number => {
     if (asset.type === 'deposit') {
@@ -357,6 +388,9 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                         <TableCell />
                         <TableCell className={styles.cellMono} title={formatNumber(asset.data.amount)}>{formatNumber(asset.data.amount)} р</TableCell>
                         <TableCell >
+                          {depositStore.updatingDepositList.has(asset.id) ? 
+                          <CircularProgress/>
+                          :
                           <div className={styles.actions}>
                             <IconButton
                               aria-label="add"
@@ -375,15 +409,15 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                               }}>
                               <RemoveIcon />
                             </IconButton>
-                            {/* <IconButton aria-label="edit" onClick={() => startEdit(asset)}>
+                            <IconButton aria-label="edit" onClick={() => openEditDepositDialog(asset.data)}>
                               <EditIcon />
-                            </IconButton> */}
+                            </IconButton>
                             <IconButton
                               aria-label="delete"
                               onClick={() => unifiedAssetsStore.removeAsset(asset.id, asset.type)}>
                               <DeleteIcon />
                             </IconButton>
-                          </div>
+                          </div>}
                         </TableCell>
                       </>
                     ) : (
@@ -509,6 +543,15 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
           onClose={closeEditAssetDialog}
           onConfirm={handleAssetChange}
           asset={editAssetDialog.asset}
+        />
+      )}
+
+        {editDepositDialog.deposit && (
+        <EditDepositDialog
+          open={editDepositDialog.open}
+          onClose={closeEditDepositDialog}
+          onConfirm={handleDepositChange}
+          deposit={editDepositDialog.deposit}
         />
       )}
     </>

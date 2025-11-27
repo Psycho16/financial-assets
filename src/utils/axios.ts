@@ -21,6 +21,7 @@ export const PATHS = {
     ADD: "user-deposits/add-deposit",
     GET: "user-deposits/",
     EDIT_AMOUNT: "user-deposits/edit-deposit-amount",
+    EDIT_DEPOSIT: "user-deposits/edit-deposit",
     DELETE: "user-deposits/delete-deposit",
   },
   USERS: {

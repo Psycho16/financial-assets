@@ -1,0 +1,1 @@
+export const isResponseSuccess = (statusCode: number) => statusCode === 200
