@@ -34,12 +34,40 @@ export class DepositStore {
   }
 
   async update(id: string, changes: Partial<Omit<Deposit, 'id'>>) {
-    await axiosClient.patch(PATHS.USER_DEPOSITS.EDIT_AMOUNT, {
+     runInAction(() => {
+          this.updatingDepositList.add(id)
+          this.updatingDepositList = this.updatingDepositList
+        })
+    const resp = await axiosClient.patch(PATHS.USER_DEPOSITS.EDIT_AMOUNT, {
       depositId: id,
       amount: changes.amount,
     })
 
-    await this.loadDeposits()
+    const isSuccess = isResponseSuccess(resp.status)
+    const updateDeposit = resp.data
+
+     if (!!updateDeposit && isSuccess) {
+          runInAction(() => {
+            this.items = this.items.map<Deposit>((item) => {
+              if (item.id === updateDeposit.id) {
+                return {
+                  ...updateDeposit,
+                  
+                }
+              }
+    
+              return {
+                ...item
+              }
+            })
+          })
+        }
+
+         runInAction(() => {
+      this.updatingDepositList.delete(id)
+      this.updatingDepositList = this.updatingDepositList
+    })
+
   }
   
   async updateDeposit(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
@@ -82,13 +110,27 @@ export class DepositStore {
       }
 
   async remove(id: string) {
-    await axiosClient.delete(PATHS.USER_DEPOSITS.DELETE, {
+       runInAction(() => {
+      this.updatingDepositList.add(id)
+      this.updatingDepositList = this.updatingDepositList
+    })
+
+    const resp = await axiosClient.delete(PATHS.USER_DEPOSITS.DELETE, {
       params: {
         depositId: id,
       }
     })
 
-    await this.loadDeposits()
+    const isSuccess = isResponseSuccess(resp.status)
+    runInAction(() => {
+      this.updatingDepositList.delete(id)
+      this.updatingDepositList = this.updatingDepositList
+    })
+   if (!isSuccess) return
+
+    runInAction(() => {
+      this.items = this.items.filter(item => item.id !== id)
+    })
   }
 
   private async loadDeposits() {
