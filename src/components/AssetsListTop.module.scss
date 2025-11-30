@@ -1,0 +1,43 @@
+.empty {
+  opacity: 0.7;
+}
+
+.ListTopWrapper {
+  width: 100%;
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-weight: 600;
+  margin: 4px 0 8px 0;
+}
+
+.items {
+  overflow: auto;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ticker {
+  opacity: 0.8;
+}
+
+.percentDown {
+  color: #ff4d4f;
+  font-variant-numeric: tabular-nums;
+}
+
+.percentUp {
+  color: #7af67e;
+  font-variant-numeric: tabular-nums;
+}

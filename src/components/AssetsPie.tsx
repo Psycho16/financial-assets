@@ -4,7 +4,7 @@ import { depositStore } from '../stores/DepositStore'
 import { exchangeStore } from '../stores/ExchangeStore'
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from 'recharts'
 import styles from './AssetsPie.module.scss'
-import { FallenAssetsList } from './FallenAssetsList'
+import { AssetsListTop } from './AssetsListTop'
 import { ExchangeAssetsModal } from './ExchangeAssetsModal'
 import { CircularProgress } from '@mui/material'
 import { STYLES } from '../constants/styles'
@@ -69,7 +69,7 @@ export const AssetsPie = observer(function AssetsPie() {
         </div>
       }
 
-      <FallenAssetsList />
+      <AssetsListTop />
 
       <ExchangeAssetsModal
         open={isExchangeModalOpen}

@@ -87,8 +87,6 @@ export class UnifiedAssetsStore {
     exchangeStore.updateAsset(id, changes)
   }
 
-  
-
   removeDeposit(id: string) {
     depositStore.remove(id)
   }

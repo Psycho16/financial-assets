@@ -34,10 +34,10 @@ export class DepositStore {
   }
 
   async update(id: string, changes: Partial<Omit<Deposit, 'id'>>) {
-     runInAction(() => {
-          this.updatingDepositList.add(id)
-          this.updatingDepositList = this.updatingDepositList
-        })
+    runInAction(() => {
+      this.updatingDepositList.add(id)
+      this.updatingDepositList = this.updatingDepositList
+    })
     const resp = await axiosClient.patch(PATHS.USER_DEPOSITS.EDIT_AMOUNT, {
       depositId: id,
       amount: changes.amount,
@@ -46,71 +46,71 @@ export class DepositStore {
     const isSuccess = isResponseSuccess(resp.status)
     const updateDeposit = resp.data
 
-     if (!!updateDeposit && isSuccess) {
-          runInAction(() => {
-            this.items = this.items.map<Deposit>((item) => {
-              if (item.id === updateDeposit.id) {
-                return {
-                  ...updateDeposit,
-                  
-                }
-              }
-    
-              return {
-                ...item
-              }
-            })
-          })
-        }
+    if (!!updateDeposit && isSuccess) {
+      runInAction(() => {
+        this.items = this.items.map<Deposit>((item) => {
+          if (item.id === updateDeposit.id) {
+            return {
+              ...updateDeposit,
 
-         runInAction(() => {
+            }
+          }
+
+          return {
+            ...item
+          }
+        })
+      })
+    }
+
+    runInAction(() => {
       this.updatingDepositList.delete(id)
       this.updatingDepositList = this.updatingDepositList
     })
 
   }
-  
+
   async updateDeposit(id: string, changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) {
     runInAction(() => {
-          this.updatingDepositList.add(id)
-          this.updatingDepositList = this.updatingDepositList
-        })
-        
-        const resp = await axiosClient.patch<Deposit>(PATHS.USER_DEPOSITS.EDIT_DEPOSIT, {
-          depositId: id,
-          name: changes.name,
-          endDate: changes.endDate,
-          ratePercent: changes.ratePercent,
-        })
-    
-        const updatedDeposit = resp.data
-        const isSuccess = isResponseSuccess(resp.status)
+      this.updatingDepositList.add(id)
+      this.updatingDepositList = this.updatingDepositList
+    })
 
-        if (!!updatedDeposit && isSuccess) {
-          runInAction(() => {
-            this.items = this.items.map<Deposit>((item) => {
-              if (item.id === updatedDeposit.id) {
-                return {
-                  ...updatedDeposit,
-                }
-              }
+    const resp = await axiosClient.patch<Deposit>(PATHS.USER_DEPOSITS.EDIT_DEPOSIT, {
+      depositId: id,
+      name: changes.name,
+      endDate: changes.endDate,
+      ratePercent: changes.ratePercent,
+    })
 
-              return {
-                ...item
-              }
-            })
-          })
-        }
-    
-        runInAction(() => {
-          this.updatingDepositList.delete(id)
-          this.updatingDepositList = this.updatingDepositList
+    const updatedDeposit = resp.data
+    const isSuccess = isResponseSuccess(resp.status)
+
+    if (!!updatedDeposit && isSuccess) {
+      runInAction(() => {
+        this.items = this.items.map<Deposit>((item) => {
+          if (item.id === updatedDeposit.id) {
+            return {
+              ...updatedDeposit,
+            }
+          }
+
+          return {
+            ...item
+          }
         })
-    
-      }
+      })
+    }
+
+    runInAction(() => {
+      this.updatingDepositList.delete(id)
+      this.updatingDepositList = this.updatingDepositList
+    })
+
+  }
 
   async remove(id: string) {
-       runInAction(() => {
+    runInAction(() => {
       this.updatingDepositList.add(id)
       this.updatingDepositList = this.updatingDepositList
     })
@@ -126,7 +126,7 @@ export class DepositStore {
       this.updatingDepositList.delete(id)
       this.updatingDepositList = this.updatingDepositList
     })
-   if (!isSuccess) return
+    if (!isSuccess) return
 
     runInAction(() => {
       this.items = this.items.filter(item => item.id !== id)
@@ -151,7 +151,9 @@ export class DepositStore {
       })
 
     } catch {
-      this.items = []
+      runInAction(() => {
+        this.items = []
+      })
     } finally {
       runInAction(() => {
         this.isLoading = false

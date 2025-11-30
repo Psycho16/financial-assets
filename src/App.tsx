@@ -10,6 +10,7 @@ import { AddAssetsDialog } from './components/AddAssetsDialog'
 import { axiosClient, PATHS } from './utils/axios'
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { USER_ID_KEY } from './constants/localStorage'
+import GlobalSnackbar from './components/GlobalSnackbar'
 
 
 const LoginScreen = ({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) => void }) => {
@@ -141,6 +142,7 @@ function App() {
     <AppThemeProvider>
       <BrowserRouter>
         <AppContent />
+        <GlobalSnackbar />
       </BrowserRouter>
     </AppThemeProvider>
   )
