@@ -32,6 +32,12 @@
   opacity: 0.8;
 }
 
+.name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .percentDown {
   color: #ff4d4f;
   font-variant-numeric: tabular-nums;

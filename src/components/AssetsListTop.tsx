@@ -86,7 +86,7 @@ export const AssetsListTop = observer(function AssetsListTop() {
         ) : (
           topFive.map((x) => (
             <div key={x.ticker} className={styles.item} style={STYLES[mode].item}>
-              <div>{x.name}</div>
+              <div className={styles.name} title={x.name}>{x.name}</div>
               <div className={styles.ticker}>{x.ticker}</div>
               <div className={topType === "fallen" ? styles.percentDown : styles.percentUp}>{x.percent.toFixed(2)}%</div>
             </div>
