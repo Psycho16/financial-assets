@@ -65,7 +65,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
     asset: null,
   })
 
-   const [editDepositDialog, setEditDepositDialog] = useState<{
+  const [editDepositDialog, setEditDepositDialog] = useState<{
     open: boolean
     deposit: Deposit | null
   }>({
@@ -171,11 +171,11 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
   }
 
   const handleDepositChange = (changes: Pick<Deposit, 'name' | 'endDate' | 'ratePercent'>) => {
-     if (!editDepositDialog?.deposit?.id) return
+    if (!editDepositDialog?.deposit?.id) return
 
     unifiedAssetsStore.updateAmount(editDepositDialog.deposit.id, changes)
   }
- 
+
 
   const getAssetValue = (asset: UnifiedAsset): number => {
     if (asset.type === 'deposit') {
@@ -388,36 +388,36 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
                         <TableCell />
                         <TableCell className={styles.cellMono} title={formatNumber(asset.data.amount)}>{formatNumber(asset.data.amount)} р</TableCell>
                         <TableCell >
-                          {depositStore.updatingDepositList.has(asset.id) ? 
-                          <CircularProgress/>
-                          :
-                          <div className={styles.actions}>
-                            <IconButton
-                              aria-label="add"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                openQuantityDepositDialog(asset, 'add')
-                              }}
-                            >
-                              <AddIcon />
-                            </IconButton>
-                            <IconButton
-                              aria-label="delete"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                openQuantityDepositDialog(asset, 'subtract')
-                              }}>
-                              <RemoveIcon />
-                            </IconButton>
-                            <IconButton aria-label="edit" onClick={() => openEditDepositDialog(asset.data)}>
-                              <EditIcon />
-                            </IconButton>
-                            <IconButton
-                              aria-label="delete"
-                              onClick={() => unifiedAssetsStore.removeAsset(asset.id, asset.type)}>
-                              <DeleteIcon />
-                            </IconButton>
-                          </div>}
+                          {depositStore.updatingDepositList.has(asset.id) ?
+                            <CircularProgress />
+                            :
+                            <div className={styles.actions}>
+                              <IconButton
+                                aria-label="add"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  openQuantityDepositDialog(asset, 'add')
+                                }}
+                              >
+                                <AddIcon />
+                              </IconButton>
+                              <IconButton
+                                aria-label="delete"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  openQuantityDepositDialog(asset, 'subtract')
+                                }}>
+                                <RemoveIcon />
+                              </IconButton>
+                              <IconButton aria-label="edit" onClick={() => openEditDepositDialog(asset.data)}>
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                aria-label="delete"
+                                onClick={() => unifiedAssetsStore.removeAsset(asset.id, asset.type)}>
+                                <DeleteIcon />
+                              </IconButton>
+                            </div>}
                         </TableCell>
                       </>
                     ) : (
@@ -546,7 +546,7 @@ export const UnifiedAssetsList = observer(function UnifiedAssetsList() {
         />
       )}
 
-        {editDepositDialog.deposit && (
+      {editDepositDialog.deposit && (
         <EditDepositDialog
           open={editDepositDialog.open}
           onClose={closeEditDepositDialog}

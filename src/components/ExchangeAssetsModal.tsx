@@ -91,16 +91,31 @@ export const ExchangeAssetsModal = observer(function ExchangeAssetsModal({ open,
                     dataKey="value"
                     nameKey="name"
                     outerRadius={120}
-                    label={({ name, percent = 0 }: { name?: string, percent?: number }) => `${name} ${(percent * 100).toFixed(1)}%`}
                   >
                     {chartData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: any) => [`${Number(value).toLocaleString('ru-RU')} ₽`, 'Стоимость']}
+                    formatter={(_, name, formatterPayload) => {
+                      const cost = formatterPayload.payload?.value.toFixed(1)
+                      return [`${Number(cost).toLocaleString('ru-RU')} ₽`, name]
+                    }}
                   />
-                  <Legend />
+                  <Legend
+                    wrapperStyle={{
+                      height: "120px",
+                      overflow: "auto"
+                    }}
+                    itemSorter={(payload) => {
+                      return -payload.payload?.value
+                    }}
+                    formatter={(value, legendPayload) => {
+                      const percent = ((legendPayload.payload?.value / totalValue) * 100).toFixed(1)
+                      const cost = legendPayload.payload?.value.toFixed(1)
+                      return [value, `: ${Number(cost).toLocaleString('ru-RU')} ₽(${percent}%)`]
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </>

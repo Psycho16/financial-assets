@@ -37,6 +37,8 @@ export const AssetsPie = observer(function AssetsPie() {
     return <div className={styles.empty}>Нет данных для диаграммы</div>
   }
 
+  const totalValue = depositsTotal + exchangeTotal
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
       {exchangeStore.isLoading ?
@@ -54,28 +56,38 @@ export const AssetsPie = observer(function AssetsPie() {
                 outerRadius={90}
                 onClick={handlePieClick}
                 style={{ cursor: 'pointer' }}
-                label={({ name, percent = 0 }: { name?: string, percent?: number }) => `${name} ${(percent * 100).toFixed(1)}%`}
               >
                 {data.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: any) => [`${Number(value).toLocaleString('ru-RU')} ₽`, 'Стоимость']}
+                formatter={(_, name, formatterPayload) => {
+                  const cost = formatterPayload.payload?.value.toFixed(1)
+                  return [`${Number(cost).toLocaleString('ru-RU')} ₽`, name]
+                }}
               />
-              <Legend />
+              <Legend
+                itemSorter={"value"}
+                formatter={(value, legendPayload) => {
+                  const percent = ((legendPayload.payload?.value / totalValue) * 100).toFixed(1)
+                  console.log(legendPayload.payload?.value, (legendPayload.payload?.value / totalValue) * 100)
+                  const cost = legendPayload.payload?.value.toFixed(1)
+                  return [value, `: ${Number(cost).toLocaleString('ru-RU')} ₽(${percent}%)`]
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
       }
 
-      <AssetsListTop />
+      < AssetsListTop />
 
       <ExchangeAssetsModal
         open={isExchangeModalOpen}
         onClose={() => setIsExchangeModalOpen(false)}
       />
-    </div>
+    </div >
   )
 })
 
