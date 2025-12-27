@@ -33,7 +33,7 @@ export const AssetsListTop = observer(function AssetsListTop() {
 
     const isFallen = topType === "fallen"
 
-    const below5 = items.filter(x => isFallen ? x.percent <= -percent : x.percent >= percent)
+    const below5 = items.filter(x => isFallen ? x.percent < -percent : x.percent > percent)
     below5.sort((a, b) => isFallen ? a.percent - b.percent : b.percent - a.percent)
     return below5.slice(0, 5)
   }, [exchangeStore.items, percent, topType])
@@ -82,7 +82,7 @@ export const AssetsListTop = observer(function AssetsListTop() {
       <div className={styles.title}>{`${LABEL_BY_TYPE[topType]} за день (топ 5${percent > 0 ? `, Больше ${percent}%` : ``})`}</div>
       <div className={styles.items}>
         {topFive.length === 0 ? (
-          <div className={styles.empty}>Нет падений более {percent}% сегодня</div>
+          <div className={styles.empty}>Нет {topType === "fallen" ? "падений" : "взлетов"} {percent > 0 ? `более ${percent}%` : ""} сегодня</div>
         ) : (
           topFive.map((x) => (
             <div key={x.ticker} className={styles.item} style={STYLES[mode].item}>
