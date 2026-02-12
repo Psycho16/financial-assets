@@ -11,6 +11,8 @@ import { axiosClient, PATHS } from './utils/axios'
 import { BrowserRouter, useLocation } from 'react-router-dom';
 import { USER_ID_KEY } from './constants/localStorage'
 import GlobalSnackbar from './components/GlobalSnackbar'
+import { exchangeStore } from './stores/ExchangeStore'
+import { depositStore } from './stores/DepositStore'
 
 
 const LoginScreen = ({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) => void }) => {
@@ -31,6 +33,7 @@ const LoginScreen = ({ setIsLoggedIn }: { setIsLoggedIn: (isLoggedIn: boolean) =
     const userId = resp.data?.session?.user?.id
     localStorage.setItem(USER_ID_KEY, userId)
     setIsLoggedIn(true)
+    Promise.allSettled([exchangeStore.loadAssets(), depositStore.loadDeposits()])
   }
 
   return (

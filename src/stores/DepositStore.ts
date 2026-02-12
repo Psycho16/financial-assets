@@ -133,12 +133,13 @@ export class DepositStore {
     })
   }
 
-  private async loadDeposits() {
+  async loadDeposits() {
     runInAction(() => {
       this.isLoading = true
     })
     try {
       const userId = localStorage.getItem(USER_ID_KEY)
+      if (!userId) return
       const resp = await axiosClient.get<{ userDeposits: Deposit[] }>(PATHS.USER_DEPOSITS.GET, { params: { userId } })
       const userDeposits = resp?.data?.userDeposits
 

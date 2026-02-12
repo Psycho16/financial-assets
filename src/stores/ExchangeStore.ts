@@ -157,12 +157,13 @@ export class ExchangeStore {
     })
   }
 
-  private async loadAssets() {
+  async loadAssets() {
     runInAction(() => {
       this.isLoading = true
     })
     try {
       const userId = localStorage.getItem(USER_ID_KEY)
+      if (!userId) return
       const resp = await axiosClient.get<{ userAssets: ExchangeAsset[] }>(PATHS.USER_ASSETS.GET, { params: { userId } })
       const userAssets = resp?.data?.userAssets
 
