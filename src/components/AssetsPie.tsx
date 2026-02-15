@@ -71,7 +71,7 @@ export const AssetsPie = observer(function AssetsPie() {
                 itemSorter={"value"}
                 formatter={(value, legendPayload) => {
                   const percent = ((legendPayload.payload?.value / totalValue) * 100).toFixed(1)
-                  console.log(legendPayload.payload?.value, (legendPayload.payload?.value / totalValue) * 100)
+
                   const cost = legendPayload.payload?.value.toFixed(1)
                   return [value, `: ${Number(cost).toLocaleString('ru-RU')} ₽(${percent}%)`]
                 }}

@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction } from 'mobx'
 import { USER_ID_KEY } from '../constants/localStorage'
 import { axiosClient, PATHS } from '../utils/axios'
 import { isResponseSuccess } from '../utils/isResponseSuccess'
+import { getMoexBoardLink } from '../utils/getMoexBoardLink'
 
 export type ExchangeAsset = {
   id: string
@@ -16,12 +17,54 @@ export type ExchangeAsset = {
   sector: string
   ticker: string
   comment: string
+  errorReason: string
 }
 
 type UpdatedAsset = Omit<ExchangeAsset, "totalPrice" | "changePercent" | "price">
 
 const recalculateTotalPrice = (price: number, quantity: number) => {
   return price * quantity
+}
+
+const isMarketDataCorrect = (data: unknown): data is { marketdata: { columns: string[], data: unknown[] } } => {
+  typeof data === 'object' && data !== null && "marketdata" in data
+  return typeof data === 'object' && data !== null && "marketdata" in data && typeof data.marketdata === 'object' && data.marketdata !== null && "columns" in data.marketdata && Array.isArray(data.marketdata.columns) && "data" in data.marketdata && Array.isArray(data.marketdata.data)
+}
+
+const getAssetDataPromise = async (assetData: ExchangeAsset): Promise<ExchangeAsset> => {
+  const { ticker, boardName } = assetData
+  if (!ticker || !boardName) return {
+    ...assetData,
+    price: 0,
+    totalPrice: 0,
+    changePercent: 0,
+  }
+  const boardLink = getMoexBoardLink(ticker, boardName)
+
+  const moexResp = await fetch(boardLink, {
+    credentials: "omit",
+  })
+
+  const data = await moexResp.json();
+
+  const columns: string[] = isMarketDataCorrect(data) ? data?.marketdata?.columns : []
+  const dataRows: any[] = isMarketDataCorrect(data) ? data?.marketdata?.data : []
+  const marketPriceIdx = columns.indexOf('MARKETPRICE')
+  const lastPriceIdx = columns.indexOf('LAST')
+  const lastToPrevPriceIdx = columns.indexOf('LASTTOPREVPRICE')
+  const row = Array.isArray(dataRows) && dataRows.length > 0 ? dataRows[0] : undefined
+
+  const marketPrice = marketPriceIdx !== -1 && row ? Number(row[marketPriceIdx]) : NaN
+  const last = lastPriceIdx !== -1 && row && Number(row[lastPriceIdx]) > 0 ? Number(row[lastPriceIdx]) : marketPrice
+  const prcnt = (lastToPrevPriceIdx !== -1 && row ? Number(row[lastToPrevPriceIdx]) : NaN) ?? 0
+
+  const stringifiedTotalPrice = (last * (assetData.quantity || 0)).toFixed(2)
+  return {
+    ...assetData,
+    price: last,
+    totalPrice: +stringifiedTotalPrice,
+    changePercent: prcnt,
+  }
 }
 
 
@@ -167,12 +210,37 @@ export class ExchangeStore {
       const resp = await axiosClient.get<{ userAssets: ExchangeAsset[] }>(PATHS.USER_ASSETS.GET, { params: { userId } })
       const userAssets = resp?.data?.userAssets
 
-      if (!userAssets) return
-      // Basic validation
+      if (!userAssets || !Array.isArray(userAssets)) {
+        runInAction(() => {
+          this.items = []
+        })
+        return
+      }
+      const hasErrorInAssetsWithPrices = userAssets.some(item => item.errorReason !== "")
+
+      if (hasErrorInAssetsWithPrices) {
+        runInAction(() => {
+          this.items = userAssets
+        })
+        const userAssetsWithPrice = await Promise.all(userAssets.map(async (assetData) => {
+          runInAction(() => {
+            this.updatingAssetList.add(assetData.id)
+            this.updatingAssetList = this.updatingAssetList
+          })
+          return getAssetDataPromise(assetData)
+        }))
+        runInAction(() => {
+          userAssetsWithPrice.map(assetData => {
+            this.updatingAssetList.delete(assetData.id)
+            this.updatingAssetList = this.updatingAssetList
+          })
+          this.items = userAssetsWithPrice
+        })
+        return
+      }
+
       runInAction(() => {
-        this.items = Array.isArray(userAssets)
-          ? userAssets
-          : []
+        this.items = userAssets
       })
     } catch {
       runInAction(() => {
